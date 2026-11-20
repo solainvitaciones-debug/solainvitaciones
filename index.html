@@ -345,9 +345,12 @@ body{
 .primary-upload-wrap{
   margin-bottom:8px;
   padding:0;
+  display:flex;
+  gap:8px;
+  align-items:stretch;
 }
 .btn-primary-upload{
-  width:100%;
+  flex:1;
   display:flex;
   align-items:center;
   justify-content:center;
@@ -355,7 +358,7 @@ body{
   background:var(--sola-primary-olive);
   color:var(--sola-primary-text);
   border:none;
-  padding:12px 20px;
+  padding:12px 18px;
   border-radius:999px;
   font-family:inherit;
   font-size:15px;
@@ -363,6 +366,33 @@ body{
   cursor:pointer;
   box-shadow:var(--sola-shadow-btn);
   transition:all .22s cubic-bezier(0.16,1,0.3,1);
+}
+.btn-camera-quick{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:6px;
+  background:var(--sola-bg-subtle);
+  color:var(--sola-primary-olive);
+  border:1px solid var(--sola-border-light);
+  padding:0 15px;
+  border-radius:999px;
+  font-family:inherit;
+  font-size:13px;
+  font-weight:600;
+  cursor:pointer;
+  transition:all .22s cubic-bezier(0.16,1,0.3,1);
+  white-space:nowrap;
+}
+.btn-camera-quick:hover{
+  border-color:var(--sola-primary-olive);
+  background:var(--sola-bg-pill);
+  transform:translateY(-2px);
+}
+.btn-camera-quick:disabled{
+  opacity:0.6;
+  cursor:not-allowed;
+  transform:none!important;
 }
 .btn-primary-upload:hover{
   background:var(--sola-primary-hover);
@@ -624,15 +654,57 @@ body{
   background:none;
   border:none;
   cursor:pointer;
-  z-index:2;
+  z-index:4;
 }
+.lightbox-counter{
+  position:absolute;
+  left:20px;
+  top:24px;
+  color:rgba(255,255,255,0.85);
+  font-size:13px;
+  font-weight:500;
+  background:rgba(20,20,20,0.55);
+  padding:5px 12px;
+  border-radius:999px;
+  backdrop-filter:blur(6px);
+  z-index:3;
+}
+.lightbox-nav{
+  position:absolute;
+  top:50%;
+  transform:translateY(-50%);
+  width:44px;
+  height:44px;
+  border-radius:50%;
+  background:rgba(25,25,25,0.6);
+  border:1px solid rgba(255,255,255,0.25);
+  color:#fff;
+  font-size:26px;
+  line-height:1;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  cursor:pointer;
+  z-index:3;
+  backdrop-filter:blur(6px);
+  transition:background .2s,transform .2s;
+  user-select:none;
+}
+.lightbox-nav:hover{
+  background:rgba(59,62,50,0.9);
+  transform:translateY(-50%) scale(1.06);
+}
+.lightbox-nav.prev{left:14px}
+.lightbox-nav.next{right:14px}
 .lightbox.sola-projecting{
   --sola-qr-width:clamp(105px, min(11vw, 22vh), 190px);
   --sola-qr-gap:clamp(12px, 2vw, 30px);
   padding:16px;
   padding-right:calc(var(--sola-qr-width) + var(--sola-qr-gap) + 16px);
 }
-.lightbox.sola-projecting #descargarFoto{display:none!important}
+.lightbox.sola-projecting #descargarFoto,
+.lightbox.sola-projecting .lightbox-nav,
+.lightbox.sola-projecting .lightbox-counter{display:none!important}
 .sola-projection-side{display:none}
 .lightbox.sola-projecting .sola-projection-side{
   display:block;
@@ -647,6 +719,64 @@ body{
 .sola-projection-side strong{display:block;margin-bottom:8px;font-weight:normal}
 #solaProjectionQR{width:100%;background:#fff;border-radius:6px;overflow:hidden;padding:6px}
 #solaProjectionQR svg{display:block;width:100%;height:auto}
+.sola-projection-msg{
+  display:none;
+  position:absolute;
+  left:24px;
+  bottom:22px;
+  right:calc(var(--sola-qr-width, 160px) + 52px);
+  max-width:620px;
+  background:rgba(24,25,22,0.82);
+  border:1px solid rgba(201,184,165,0.35);
+  color:#FAF8F5;
+  padding:14px 20px;
+  border-radius:18px;
+  backdrop-filter:blur(12px);
+  -webkit-backdrop-filter:blur(12px);
+  box-shadow:0 10px 30px rgba(0,0,0,0.35);
+  text-align:left;
+  z-index:3;
+  transition:opacity .4s ease,transform .4s ease;
+}
+.lightbox.sola-projecting .sola-projection-msg.has-msg{
+  display:block;
+}
+.sola-projection-msg .msg-quote{
+  font-size:clamp(14px, 1.8vw, 18px);
+  line-height:1.45;
+  margin:0 0 6px;
+  color:#fff;
+  display:-webkit-box;
+  -webkit-line-clamp:2;
+  -webkit-box-orient:vertical;
+  overflow:hidden;
+}
+.sola-projection-msg .msg-author{
+  font-size:clamp(12px, 1.3vw, 14px);
+  color:#C9B8A5;
+  font-weight:600;
+  margin:0;
+}
+.sola-new-photo-badge{
+  display:none;
+  position:absolute;
+  top:22px;
+  left:24px;
+  background:rgba(59,62,50,0.92);
+  color:#fff;
+  border:1px solid rgba(201,184,165,0.5);
+  padding:6px 14px;
+  border-radius:999px;
+  font-size:13px;
+  font-weight:600;
+  z-index:3;
+  box-shadow:0 4px 16px rgba(0,0,0,0.3);
+}
+.lightbox.sola-projecting .sola-new-photo-badge.active{
+  display:inline-flex;
+  align-items:center;
+  gap:6px;
+}
 </style>
 </head>
 <body>
@@ -846,6 +976,7 @@ body{
       <div id="empty"></div>
       <div id="status"></div>
       <input id="files" type="file" accept="image/jpeg,image/png,image/webp,video/mp4,video/quicktime,video/webm,.mov,.mp4,.webm" multiple>
+      <input id="cameraInput" type="file" accept="image/jpeg,image/png,image/webp" capture="environment">
     </div>
   </main>
 
@@ -859,6 +990,10 @@ body{
           <path d="m15 15-3-3-3 3"/>
         </svg>
         <span>Subir fotos y videos</span>
+      </button>
+      <button type="button" id="btnCamaraRapida" class="btn-camera-quick" title="Sacar foto en el momento">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+        <span>Cámara</span>
       </button>
     </div>
 
@@ -901,17 +1036,28 @@ body{
   <div class="modal-box">
     <button type="button" class="modal-close-btn" id="closeModalQR" aria-label="Cerrar">✕</button>
     <h3 style="margin:0 0 6px;font-size:18px;">Escaneá y compartí</h3>
-    <p style="margin:0 0 16px;font-size:13px;color:var(--sola-text-muted);">Tus invitados pueden escanear este código para subir sus fotos al instante.</p>
+    <p style="margin:0 0 16px;font-size:13px;color:var(--sola-text-muted);">Tus invitados pueden escanear este código para subir sus fotos y videos al instante.</p>
     <div id="modalQRSlot" class="qr-container"></div>
-    <button type="button" id="btnDescargarModalQR" class="btn-send-msg" style="width:100%">Descargar imagen QR</button>
+    <div style="display:flex;flex-direction:column;gap:8px">
+      <button type="button" id="btnDescargarTarjetaQR" class="btn-send-msg" style="width:100%">Descargar tarjeta para imprimir (PNG)</button>
+      <button type="button" id="btnDescargarModalQR" style="width:100%;background:var(--sola-bg-subtle);color:var(--sola-text-main);border:1px solid var(--sola-border-light);padding:10px 18px;border-radius:999px;font-family:inherit;font-size:13px;font-weight:600;cursor:pointer">Descargar solo código QR (PNG)</button>
+    </div>
   </div>
 </div>
 
 <!-- LIGHTBOX & PROJECTION MODAL -->
 <div class="lightbox" id="lightbox">
   <button class="lightbox-close" id="close" aria-label="Cerrar">×</button>
+  <div class="lightbox-counter" id="lightboxCounter"></div>
+  <div class="sola-new-photo-badge" id="badgeFotoNueva">✨ Recién compartida</div>
+  <button type="button" class="lightbox-nav prev" id="prevFoto" aria-label="Foto anterior">‹</button>
   <img id="large" alt="Foto ampliada">
+  <button type="button" class="lightbox-nav next" id="nextFoto" aria-label="Foto siguiente">›</button>
   <a id="descargarFoto" style="position:absolute;left:20px;bottom:20px;color:#fff;border:1px solid #fff;background:#222b;text-decoration:none;padding:10px 16px;font-size:13px;border-radius:999px" href="#" download>Descargar foto</a>
+  <div class="sola-projection-msg" id="proyeccionMensaje">
+    <p class="msg-quote" id="proyeccionMensajeTexto"></p>
+    <p class="msg-author" id="proyeccionMensajeAutor"></p>
+  </div>
   <aside class="sola-projection-side" aria-label="Acceso por QR">
     <strong><span>Escaneá el QR</span><span>¡Compartí tus fotos!</span></strong>
     <div id="solaProjectionQR"></div>
@@ -920,17 +1066,29 @@ body{
 
 <script>
 // ESTADO GLOBAL Y ELEMENTOS
-const images=[];let videos=[];let clavePareja="";let projecting=false,idx=0,timer=null,loading=false;
+const images=[];let videos=[];let mensajesEvento=[];let clavePareja="";let projecting=false,idx=0,msgProyeccionIdx=0,timer=null,loading=false;
+let visorIdx=0;
+const fotosVistasProyeccion=new Set();
+const colaPrioridadProyeccion=[];
 const input=document.getElementById('files'),
+      cameraInput=document.getElementById('cameraInput'),
       gallery=document.getElementById('gallery'),
       emptyFotos=document.getElementById('emptyFotos'),
       emptyVideos=document.getElementById('emptyVideos'),
       emptyMensajes=document.getElementById('emptyMensajes'),
       lightbox=document.getElementById('lightbox'),
       large=document.getElementById('large'),
+      lightboxCounter=document.getElementById('lightboxCounter'),
+      badgeFotoNueva=document.getElementById('badgeFotoNueva'),
+      prevFoto=document.getElementById('prevFoto'),
+      nextFoto=document.getElementById('nextFoto'),
+      proyeccionMensaje=document.getElementById('proyeccionMensaje'),
+      proyeccionMensajeTexto=document.getElementById('proyeccionMensajeTexto'),
+      proyeccionMensajeAutor=document.getElementById('proyeccionMensajeAutor'),
       upload=document.getElementById('upload'),
       status=document.getElementById('status'),
       btnSubir=document.getElementById('btnSubir'),
+      btnCamaraRapida=document.getElementById('btnCamaraRapida'),
       btnProyeccion=document.getElementById('btnProyeccion'),
       btnDescargar=document.getElementById('btnDescargar'),
       btnCopiarEnlace=document.getElementById('btnCopiarEnlace'),
@@ -939,6 +1097,11 @@ const input=document.getElementById('files'),
       closeModalQR=document.getElementById('closeModalQR'),
       toast=document.getElementById('toast'),
       avisoIncompleto=document.getElementById('avisoIncompleto');
+
+function actualizarContadorTab(tabId, nombreBase, cantidad){
+  const span=document.querySelector(`#${tabId} span`);
+  if(span) span.textContent=cantidad>0?`${nombreBase} (${cantidad})`:nombreBase;
+}
 
 // NOTIFICACIÓN TOAST
 function showToast(msj, tiempo=3200){
@@ -975,7 +1138,7 @@ tabs.forEach(tab=>{
   });
 });
 
-// DISPARADOR DE SUBIDA
+// DISPARADOR DE SUBIDA Y CÁMARA RÁPIDA
 function iniciarSubida(){
   if(upload.disabled){
     alert('Para subir fotos o videos necesitás ingresar con el enlace o código QR de tu evento.');
@@ -983,24 +1146,63 @@ function iniciarSubida(){
   }
   input.click();
 }
+function iniciarCamaraRapida(){
+  if(upload.disabled){
+    alert('Para sacar y subir una foto necesitás ingresar con el enlace o código QR de tu evento.');
+    return;
+  }
+  cameraInput.click();
+}
 btnSubir.onclick=iniciarSubida;
 upload.onclick=iniciarSubida;
+if(btnCamaraRapida) btnCamaraRapida.onclick=iniciarCamaraRapida;
 
-// PROYECCIÓN
+// PROYECCIÓN EN VIVO (CON PANTALLA COMPLETA, DEDICATORIAS Y PRIORIDAD A FOTOS NUEVAS)
+function actualizarMensajeEnProyeccion(){
+  if(!projecting||!mensajesEvento.length){
+    proyeccionMensaje.classList.remove('has-msg');
+    return;
+  }
+  const m=mensajesEvento[msgProyeccionIdx%mensajesEvento.length];
+  msgProyeccionIdx=(msgProyeccionIdx+1)%mensajesEvento.length;
+  proyeccionMensajeTexto.textContent=`“${m.texto}”`;
+  proyeccionMensajeAutor.textContent=`— ${m.nombre}`;
+  proyeccionMensaje.classList.add('has-msg');
+}
+
 btnProyeccion.onclick=()=>{
   if(!images.length){
     alert(upload.disabled ? 'Para proyectar recuerdos necesitás abrir el enlace completo de un evento.' : 'Todavía no hay fotografías para proyectar.');
     return;
   }
-  projecting=true;idx=0;show(images[idx]);
+  projecting=true;idx=0;
+  images.forEach(u=>fotosVistasProyeccion.add(u));
+  colaPrioridadProyeccion.length=0;
+  badgeFotoNueva.classList.remove('active');
+  show(images[idx]);
   lightbox.classList.add('sola-projecting');
+  actualizarMensajeEnProyeccion();
+  if(lightbox.requestFullscreen){
+    lightbox.requestFullscreen().catch(()=>{});
+  }
   clearInterval(timer);
   timer=setInterval(()=>{
     if(!projecting||!images.length)return;
-    idx=(idx+1)%images.length;
-    large.src=images[idx];
-    document.getElementById('descargarFoto').href=images[idx]+'&descargar=1';
-  },3500);
+    let urlMostrar;
+    if(colaPrioridadProyeccion.length>0){
+      urlMostrar=colaPrioridadProyeccion.shift();
+      fotosVistasProyeccion.add(urlMostrar);
+      badgeFotoNueva.classList.add('active');
+    }else{
+      idx=(idx+1)%images.length;
+      urlMostrar=images[idx];
+      fotosVistasProyeccion.add(urlMostrar);
+      badgeFotoNueva.classList.remove('active');
+    }
+    large.src=urlMostrar;
+    document.getElementById('descargarFoto').href=urlMostrar+'&descargar=1';
+    actualizarMensajeEnProyeccion();
+  },4000);
 };
 
 // COPIAR ENLACE
@@ -1013,7 +1215,7 @@ btnCopiarEnlace.onclick=async()=>{
   }
 };
 
-// CÓDIGO QR MODAL
+// CÓDIGO QR MODAL Y GENERADOR PNG / TARJETA IMPRIMIBLE
 btnModalQR.onclick=()=>{
   renderQRModal();
   modalQR.classList.add('open');
@@ -1041,6 +1243,38 @@ function generarSvgQR(url){
   return svg;
 }
 
+function dibujarQREnCanvas(ctx, url, x, y, size, colorOscuro='#1F211B', colorFondo='#FFFFFF'){
+  const qr=new SolaQR.QRCode(0,SolaQR.level.L);
+  qr.addData(url);
+  qr.make();
+  const n=qr.getModuleCount(),quiet=4,total=n+quiet*2;
+  const celda=size/total;
+  ctx.fillStyle=colorFondo;
+  ctx.fillRect(x,y,size,size);
+  ctx.fillStyle=colorOscuro;
+  for(let r=0;r<n;r++){
+    for(let c=0;c<n;c++){
+      if(qr.isDark(r,c)){
+        ctx.fillRect(Math.floor(x+(c+quiet)*celda),Math.floor(y+(r+quiet)*celda),Math.ceil(celda),Math.ceil(celda));
+      }
+    }
+  }
+}
+
+function descargarCanvasPNG(canvas, nombreArchivo){
+  canvas.toBlob((blob)=>{
+    if(!blob)return;
+    const url=URL.createObjectURL(blob);
+    const a=document.createElement('a');
+    a.href=url;
+    a.download=nombreArchivo;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(()=>URL.revokeObjectURL(url),30000);
+  },'image/png');
+}
+
 function renderQRModal(){
   const slot=document.getElementById('modalQRSlot');
   slot.innerHTML='';
@@ -1051,19 +1285,107 @@ function renderQRModal(){
     slot.innerHTML='<p style="font-size:12px;color:#999">QR disponible al conectarse al evento</p>';
   }
 }
+
 document.getElementById('btnDescargarModalQR').onclick=()=>{
-  showToast('Guardando código QR...');
-  const svg=document.querySelector('#modalQRSlot svg');
-  if(!svg){alert('No se pudo generar la imagen del QR');return;}
-  const svgData=new XMLSerializer().serializeToString(svg);
-  const blob=new Blob([svgData], {type:'image/svg+xml;charset=utf-8'});
-  const url=URL.createObjectURL(blob);
-  const a=document.createElement('a');
-  a.href=url;
-  a.download='QR-Album-Sola.svg';
-  document.body.appendChild(a);
-  a.click();
-  a.remove();
+  showToast('Descargando código QR en PNG…');
+  try{
+    const canvas=document.createElement('canvas');
+    canvas.width=1000;canvas.height=1000;
+    const ctx=canvas.getContext('2d');
+    dibujarQREnCanvas(ctx,window.location.href,0,0,1000,'#111111','#FFFFFF');
+    descargarCanvasPNG(canvas,'QR-Album-Sola.png');
+  }catch(e){
+    alert('No se pudo generar la imagen PNG del QR');
+  }
+};
+
+document.getElementById('btnDescargarTarjetaQR').onclick=async()=>{
+  showToast('Preparando tarjeta lista para imprimir…');
+  try{
+    const canvas=document.createElement('canvas');
+    canvas.width=1200;canvas.height=1600;
+    const ctx=canvas.getContext('2d');
+    // Fondo crema Sola
+    ctx.fillStyle='#FAF8F5';
+    ctx.fillRect(0,0,1200,1600);
+    // Marco interior elegante
+    ctx.strokeStyle='#DED7CC';
+    ctx.lineWidth=3;
+    ctx.strokeRect(56,56,1088,1488);
+    ctx.strokeStyle='#EBE5DC';
+    ctx.lineWidth=1.5;
+    ctx.strokeRect(72,72,1056,1456);
+
+    const titulo=(document.getElementById('eventoNombre')?.textContent||'Álbum Compartido').trim();
+    const fecha=(document.getElementById('eventoFecha')?.textContent||'').trim();
+
+    ctx.textAlign='center';
+    ctx.fillStyle='#7A7670';
+    ctx.font='600 26px "Plus Jakarta Sans", sans-serif';
+    ctx.fillText('Á L B U M   C O M P A R T I D O',600,190);
+
+    ctx.fillStyle='#252525';
+    ctx.font='700 64px "Plus Jakarta Sans", sans-serif';
+    ctx.fillText(titulo.slice(0,32),600,290);
+
+    if(fecha){
+      ctx.fillStyle='#7A7670';
+      ctx.font='400 32px "Plus Jakarta Sans", sans-serif';
+      ctx.fillText(fecha,600,350);
+    }
+
+    // Divisor corazón
+    ctx.strokeStyle='#D8D0C5';
+    ctx.lineWidth=2;
+    ctx.beginPath();ctx.moveTo(430,405);ctx.lineTo(560,405);ctx.stroke();
+    ctx.beginPath();ctx.moveTo(640,405);ctx.lineTo(770,405);ctx.stroke();
+    ctx.fillStyle='#9C8E7E';
+    ctx.font='32px sans-serif';
+    ctx.fillText('♡',600,416);
+
+    // Caja blanca con sombra para el QR
+    ctx.save();
+    ctx.shadowColor='rgba(40,35,25,0.08)';
+    ctx.shadowBlur=36;
+    ctx.shadowOffsetY=12;
+    ctx.fillStyle='#FFFFFF';
+    ctx.beginPath();
+    if(ctx.roundRect) ctx.roundRect(240,470,720,720,40);
+    else ctx.rect(240,470,720,720);
+    ctx.fill();
+    ctx.restore();
+
+    dibujarQREnCanvas(ctx,window.location.href,280,510,640,'#252525','#FFFFFF');
+
+    // Instrucciones inferiores
+    ctx.fillStyle='#3B3E32';
+    ctx.font='700 40px "Plus Jakarta Sans", sans-serif';
+    ctx.fillText('¡Escaneá el código QR!',600,1285);
+
+    ctx.fillStyle='#7A7670';
+    ctx.font='400 30px "Plus Jakarta Sans", sans-serif';
+    ctx.fillText('Compartí tus fotos, videos y mensajes del evento',600,1340);
+
+    // Logo Sola al pie si está cargado
+    try{
+      const logoImg=document.querySelector('.sola-footer img');
+      if(logoImg&&logoImg.complete&&logoImg.naturalWidth>0){
+        const h=54;
+        const w=(logoImg.naturalWidth/logoImg.naturalHeight)*h;
+        ctx.globalAlpha=0.75;
+        ctx.drawImage(logoImg,600-w/2,1435,w,h);
+        ctx.globalAlpha=1;
+      }else{
+        ctx.fillStyle='#A4A099';
+        ctx.font='500 22px "Plus Jakarta Sans", sans-serif';
+        ctx.fillText('solainvitaciones.com.ar',600,1475);
+      }
+    }catch(e){}
+
+    descargarCanvasPNG(canvas,'Tarjeta-QR-Mesa-Sola.png');
+  }catch(e){
+    alert('No se pudo generar la tarjeta QR');
+  }
 };
 
 // ADMINISTRACIÓN DE LA PAREJA
@@ -1150,20 +1472,68 @@ async function eliminarArchivo(tipo,nombre){
   }catch(e){alert(e.message)}
 }
 
-// LIGHTBOX VISOR
-function show(url){
+// LIGHTBOX VISOR (CON NAVEGACIÓN SWIPE, BOTONES Y TECLADO)
+function actualizarVisorFoto(url){
+  const pos=images.indexOf(url);
+  if(pos!==-1) visorIdx=pos;
   large.src=url;
   document.getElementById('descargarFoto').href=url+'&descargar=1';
+  if(lightboxCounter){
+    lightboxCounter.textContent=images.length>0?`${visorIdx+1} / ${images.length}`:'';
+    lightboxCounter.style.display=images.length>1?'block':'none';
+  }
+  const mostrarNav=images.length>1?'flex':'none';
+  if(prevFoto) prevFoto.style.display=mostrarNav;
+  if(nextFoto) nextFoto.style.display=mostrarNav;
+}
+
+function show(url){
+  actualizarVisorFoto(url);
   lightbox.style.display='flex';
 }
+
+function cambiarFotoVisor(delta){
+  if(!images.length||projecting)return;
+  visorIdx=(visorIdx+delta+images.length)%images.length;
+  actualizarVisorFoto(images[visorIdx]);
+}
+
+if(prevFoto) prevFoto.onclick=(e)=>{e.stopPropagation();cambiarFotoVisor(-1)};
+if(nextFoto) nextFoto.onclick=(e)=>{e.stopPropagation();cambiarFotoVisor(1)};
+
+let touchStartX=0,touchStartY=0;
+lightbox.addEventListener('touchstart',(e)=>{
+  if(e.touches.length===1){
+    touchStartX=e.touches[0].clientX;
+    touchStartY=e.touches[0].clientY;
+  }
+},{passive:true});
+lightbox.addEventListener('touchend',(e)=>{
+  if(projecting||!e.changedTouches.length)return;
+  const dx=e.changedTouches[0].clientX-touchStartX;
+  const dy=e.changedTouches[0].clientY-touchStartY;
+  if(Math.abs(dx)>45 && Math.abs(dx)>Math.abs(dy)*1.3){
+    cambiarFotoVisor(dx<0?1:-1);
+  }
+},{passive:true});
+
 function stop(){
   clearInterval(timer);timer=null;projecting=false;
   lightbox.classList.remove('sola-projecting');
+  badgeFotoNueva.classList.remove('active');
   lightbox.style.display='none';
+  if(document.fullscreenElement){
+    document.exitFullscreen?.().catch(()=>{});
+  }
 }
 document.getElementById('close').onclick=stop;
 lightbox.onclick=e=>{if(e.target===lightbox)stop()};
-document.addEventListener('keydown',e=>{if(e.key==='Escape')stop()});
+document.addEventListener('keydown',e=>{
+  if(lightbox.style.display!=='flex')return;
+  if(e.key==='Escape')stop();
+  else if(e.key==='ArrowLeft')cambiarFotoVisor(-1);
+  else if(e.key==='ArrowRight')cambiarFotoVisor(1);
+});
 
 // SUBIDA Y COMPRESIÓN
 function obtenerTipoVideo(archivo){
@@ -1238,10 +1608,9 @@ async function prepararFoto(archivo){
   }finally{bitmap.close?.()}
 }
 
-input.onchange=async()=>{
-  const archivos=[...input.files];
+async function procesarSubidaArchivos(archivos){
   if(!archivos.length)return;
-  upload.disabled=true;btnSubir.disabled=true;
+  upload.disabled=true;btnSubir.disabled=true;if(btnCamaraRapida)btnCamaraRapida.disabled=true;
   const textoBotonOriginal=btnSubir.querySelector('span')?.textContent||'Subir fotos y videos';
   const spanBoton=btnSubir.querySelector('span');
   let errores=[];
@@ -1275,10 +1644,14 @@ input.onchange=async()=>{
     }catch(error){errores.push(archivo.name+': '+error.message)}
   }
   if(spanBoton) spanBoton.textContent=textoBotonOriginal;
-  input.value='';upload.disabled=false;btnSubir.disabled=false;
+  input.value='';if(cameraInput)cameraInput.value='';
+  upload.disabled=false;btnSubir.disabled=false;if(btnCamaraRapida)btnCamaraRapida.disabled=false;
   await Promise.all([cargarFotos(),cargarVideos()]);
   showToast(errores.length?errores.join(' | '):'¡Recuerdos compartidos correctamente! ✨', 4200);
-};
+}
+
+input.onchange=()=>procesarSubidaArchivos([...input.files]);
+if(cameraInput) cameraInput.onchange=()=>procesarSubidaArchivos([...cameraInput.files]);
 
 // URL PARAMS Y ARRANQUE
 const qs=new URLSearchParams(window.location.search);
@@ -1292,9 +1665,10 @@ if(!qs.has('evento')||!qs.has('clave')){
   avisoIncompleto.style.display='block';
   upload.disabled=true;
   btnSubir.style.opacity='0.85';
+  if(btnCamaraRapida) btnCamaraRapida.style.opacity='0.85';
 }else{
   cargarFotos();cargarVideos();
-  setInterval(()=>{cargarFotos();cargarVideos()},10000);
+  setInterval(()=>{cargarFotos();cargarVideos();cargarMensajes()},10000);
 }
 
 // CARGA DE FOTOS — paginada con scroll infinito y aparición suave a medida que se scrollea
@@ -1438,6 +1812,14 @@ async function cargarFotos(){
     if(datos.fechaEvento) document.getElementById('eventoFecha').textContent=formatearFecha(datos.fechaEvento);
 
     const nuevas=(datos.fotos||[]).map(f=>f.url);
+    actualizarContadorTab('tabFotos','Fotos',nuevas.length);
+    if(projecting){
+      for(const u of nuevas){
+        if(!fotosVistasProyeccion.has(u) && !colaPrioridadProyeccion.includes(u)){
+          colaPrioridadProyeccion.push(u);
+        }
+      }
+    }
     const cambio=todasLasFotos.length!==nuevas.length||todasLasFotos.some((url,i)=>url!==nuevas[i])||gallery.dataset.admin!==(clavePareja?"1":"0");
     if(cambio){
       gallery.dataset.admin=clavePareja?"1":"0";
@@ -1464,6 +1846,7 @@ async function cargarVideos(){
     if(!r.ok)throw Error('No se pudieron cargar videos');
     const d=await r.json();
     const nuevas=d.videos||[];
+    actualizarContadorTab('tabVideos','Videos',nuevas.length);
     if(JSON.stringify(nuevas.map(v=>v.url))===JSON.stringify(videos.map(v=>v.url))&&cont.dataset.admin===(clavePareja?"1":"0"))return;
     videos=nuevas;
     cont.dataset.admin=clavePareja?'1':'0';
@@ -1493,6 +1876,8 @@ async function cargarMensajes(){
     const respuesta=await fetch("/mensajes"+location.search);
     if(!respuesta.ok)throw new Error("No se pudieron cargar los mensajes");
     const datos=await respuesta.json();
+    mensajesEvento=datos.mensajes||[];
+    actualizarContadorTab('tabMensajes','Mensajes',mensajesEvento.length);
     listaMensajes.replaceChildren();
     for(const mensaje of datos.mensajes){
       const tarjeta=document.createElement("div");tarjeta.className="msg-card";
