@@ -59,7 +59,7 @@ body{
   width:100%;
   background:linear-gradient(180deg, #ECE5D8 0%, #D8CEBF 100%);
   position:relative;
-  padding-top:16px;
+  padding-top:0;
   overflow:hidden;
 }
 .camera-svg{
@@ -73,7 +73,7 @@ body{
 .content-card{
   position:relative;
   z-index:2;
-  margin-top:-32px;
+  margin-top:-38px;
   background:var(--sola-bg-surface);
   border-radius:32px 32px 0 0;
   padding:26px 20px 20px;
@@ -431,10 +431,11 @@ body{
 
 /* FOOTER & ADMIN */
 .sola-footer{
-  margin-top:18px;
+  margin-top:20px;
   display:flex;
-  justify-content:center;
-  gap:12px;
+  flex-direction:column;
+  align-items:center;
+  gap:6px;
   font-size:12px;
 }
 .btn-admin-link{
@@ -583,11 +584,10 @@ body{
 
 <div class="app-container">
 
-  <!-- VINTAGE RETRO CAMERA HEADER -->
+  <!-- VINTAGE RETRO CAMERA HEADER (LOWER HALF WITH SOLA LOGO) -->
   <header class="camera-hero">
-    <svg class="camera-svg" viewBox="0 0 500 210" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <svg class="camera-svg" viewBox="0 0 500 170" fill="none" xmlns="http://www.w3.org/2000/svg">
       <defs>
-        <!-- Gradients for realistic metallic and leather materials -->
         <linearGradient id="silverDial" x1="0" y1="0" x2="1" y2="0">
           <stop offset="0%" stop-color="#9C9588"/>
           <stop offset="25%" stop-color="#EBE7DE"/>
@@ -597,13 +597,13 @@ body{
         </linearGradient>
         <linearGradient id="silverTopPlate" x1="0" y1="0" x2="0" y2="1">
           <stop offset="0%" stop-color="#FFFFFF"/>
-          <stop offset="15%" stop-color="#E8E4DA"/>
-          <stop offset="75%" stop-color="#D4CBBB"/>
+          <stop offset="20%" stop-color="#E8E4DA"/>
+          <stop offset="70%" stop-color="#D4CBBB"/>
           <stop offset="100%" stop-color="#ABA293"/>
         </linearGradient>
         <linearGradient id="leatherette" x1="0" y1="0" x2="0" y2="1">
           <stop offset="0%" stop-color="#DCD5C8"/>
-          <stop offset="50%" stop-color="#D0C7B8"/>
+          <stop offset="40%" stop-color="#D0C7B8"/>
           <stop offset="100%" stop-color="#C3B9A9"/>
         </linearGradient>
         <linearGradient id="lensOuterRing" x1="0" y1="0" x2="1" y2="1">
@@ -625,51 +625,55 @@ body{
         </linearGradient>
       </defs>
 
-      <!-- Top Dials -->
-      <rect x="75" y="6" width="70" height="22" rx="3" fill="url(#silverDial)"/>
-      <line x1="85" y1="6" x2="85" y2="28" stroke="#7A7265" stroke-width="1"/>
-      <line x1="95" y1="6" x2="95" y2="28" stroke="#7A7265" stroke-width="1"/>
-      <line x1="105" y1="6" x2="105" y2="28" stroke="#7A7265" stroke-width="1"/>
-      <line x1="115" y1="6" x2="115" y2="28" stroke="#7A7265" stroke-width="1"/>
-      <line x1="125" y1="6" x2="125" y2="28" stroke="#7A7265" stroke-width="1"/>
-      <line x1="135" y1="6" x2="135" y2="28" stroke="#7A7265" stroke-width="1"/>
+      <!-- Peeking Dials from top edge -->
+      <rect x="75" y="-8" width="70" height="20" rx="3" fill="url(#silverDial)"/>
+      <line x1="85" y1="0" x2="85" y2="12" stroke="#7A7265" stroke-width="1"/>
+      <line x1="95" y1="0" x2="95" y2="12" stroke="#7A7265" stroke-width="1"/>
+      <line x1="105" y1="0" x2="105" y2="12" stroke="#7A7265" stroke-width="1"/>
+      <line x1="115" y1="0" x2="115" y2="12" stroke="#7A7265" stroke-width="1"/>
+      <line x1="125" y1="0" x2="125" y2="12" stroke="#7A7265" stroke-width="1"/>
+      <line x1="135" y1="0" x2="135" y2="12" stroke="#7A7265" stroke-width="1"/>
 
-      <!-- Right Shutter & Small Dial -->
-      <rect x="365" y="12" width="28" height="16" rx="2" fill="url(#silverDial)"/>
-      <rect x="405" y="8" width="45" height="20" rx="3" fill="url(#silverDial)"/>
+      <rect x="365" y="-6" width="28" height="18" rx="2" fill="url(#silverDial)"/>
+      <rect x="405" y="-8" width="45" height="20" rx="3" fill="url(#silverDial)"/>
 
-      <!-- Camera Body: Top Metal Plate -->
-      <path d="M 30,26 L 470,26 Q 488,26 488,44 L 488,68 L 12,68 L 12,44 Q 12,26 30,26 Z" fill="url(#silverTopPlate)"/>
-      <rect x="12" y="68" width="476" height="5" fill="#968E80"/>
+      <!-- Top Silver Metal Band -->
+      <path d="M 12,8 L 488,8 L 488,38 L 12,38 Z" fill="url(#silverTopPlate)"/>
+      <rect x="12" y="38" width="476" height="4" fill="#968E80"/>
 
-      <!-- Camera Body: Warm Textured Leatherette -->
-      <rect x="12" y="73" width="476" height="137" fill="url(#leatherette)"/>
+      <!-- Lower Camera Body: Warm Textured Leatherette -->
+      <rect x="12" y="42" width="476" height="128" fill="url(#leatherette)"/>
+
+      <!-- Sola Brand Logo on the camera front plate (engraved metallic relief effect) -->
+      <g transform="translate(42, 60)">
+        <image href="assets/logo-sola-isotipo.png" x="0" y="0" width="84" height="63" opacity="0.85" style="filter: drop-shadow(0 1px 1px rgba(255,255,255,0.75)) drop-shadow(0 -1px 1px rgba(0,0,0,0.25));" />
+      </g>
 
       <!-- Viewfinder on right -->
-      <rect x="368" y="36" width="62" height="26" rx="5" fill="#1C2026" stroke="#9E9689" stroke-width="2"/>
-      <rect x="372" y="40" width="54" height="18" rx="3" fill="#2E3744"/>
-      <path d="M 374,42 Q 395,50 422,46" stroke="#5D7391" stroke-width="2" fill="none" opacity="0.6"/>
+      <rect x="370" y="14" width="62" height="26" rx="5" fill="#1C2026" stroke="#9E9689" stroke-width="2"/>
+      <rect x="374" y="18" width="54" height="18" rx="3" fill="#2E3744"/>
+      <path d="M 376,20 Q 397,28 424,24" stroke="#5D7391" stroke-width="2" fill="none" opacity="0.6"/>
 
-      <!-- Main Vintage Lens Assembly (Centered at x=250, y=105, radius 96) -->
+      <!-- Main Vintage Lens Assembly (Centered at x=250, y=95, radius 96) -->
       <!-- Shadow behind lens -->
-      <circle cx="250" cy="105" r="96" fill="#000000" opacity="0.12"/>
+      <circle cx="250" cy="95" r="96" fill="#000000" opacity="0.14"/>
       
       <!-- Outer Metal Bezel -->
-      <circle cx="250" cy="105" r="92" fill="url(#lensOuterRing)" stroke="#787062" stroke-width="1.5"/>
+      <circle cx="250" cy="95" r="92" fill="url(#lensOuterRing)" stroke="#787062" stroke-width="1.5"/>
       
       <!-- Stepped Inner Rings -->
-      <circle cx="250" cy="105" r="82" fill="#232323" stroke="#8A8275" stroke-width="1"/>
-      <circle cx="250" cy="105" r="74" fill="#383838"/>
-      <circle cx="250" cy="105" r="66" fill="#18181A" stroke="#524D44" stroke-width="1.5"/>
+      <circle cx="250" cy="95" r="82" fill="#232323" stroke="#8A8275" stroke-width="1"/>
+      <circle cx="250" cy="95" r="74" fill="#383838"/>
+      <circle cx="250" cy="95" r="66" fill="#18181A" stroke="#524D44" stroke-width="1.5"/>
       
       <!-- Deep Coated Glass Lens -->
-      <circle cx="250" cy="105" r="58" fill="url(#lensGlass)"/>
-      <circle cx="250" cy="105" r="38" fill="#0A0B0E" opacity="0.85"/>
+      <circle cx="250" cy="95" r="58" fill="url(#lensGlass)"/>
+      <circle cx="250" cy="95" r="38" fill="#0A0B0E" opacity="0.85"/>
       
       <!-- Glass Specular Reflection Curves -->
-      <path d="M 215,75 A 48 48 0 0 1 285,75 A 44 44 0 0 0 215,75 Z" fill="url(#glassFlare)"/>
-      <ellipse cx="232" cy="88" rx="8" ry="4" fill="#FFFFFF" opacity="0.45" transform="rotate(-25 232 88)"/>
-      <ellipse cx="270" cy="126" rx="14" ry="6" fill="#586A85" opacity="0.25" transform="rotate(30 270 126)"/>
+      <path d="M 215,65 A 48 48 0 0 1 285,65 A 44 44 0 0 0 215,65 Z" fill="url(#glassFlare)"/>
+      <ellipse cx="232" cy="78" rx="8" ry="4" fill="#FFFFFF" opacity="0.45" transform="rotate(-25 232 78)"/>
+      <ellipse cx="270" cy="116" rx="14" ry="6" fill="#586A85" opacity="0.25" transform="rotate(30 270 116)"/>
     </svg>
   </header>
 
@@ -805,6 +809,9 @@ body{
     </div>
 
     <footer class="sola-footer">
+      <div style="margin-bottom:10px">
+        <img src="assets/logo-sola-completo.png" alt="Sola Invitaciones Digitales" style="height:24px;opacity:0.75;filter:drop-shadow(0 1px 2px rgba(0,0,0,0.04));display:inline-block">
+      </div>
       <button type="button" id="pareja" class="btn-admin-link">⚙ Administrar mi álbum</button>
     </footer>
   </main>
