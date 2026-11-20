@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Administración | Sola Invitaciones</title>
+  <style>
+    body { margin: 0; background: #F4F1EB; color: #4B4B4D; font-family: Arial, sans-serif; }
+    main { max-width: 650px; margin: 60px auto; padding: 24px; }
+    h1 { font-family: Georgia, serif; font-size: 38px; }
+    .panel { background: white; padding: 28px; border-radius: 12px; margin-bottom: 24px; }
+    label { display: block; margin-top: 18px; }
+    input { box-sizing: border-box; width: 100%; padding: 12px; margin-top: 7px; border: 1px solid #ccc; border-radius: 5px; }
+    button { margin-top: 24px; padding: 14px 24px; background: #C9B8A5; color: #292929; border: none; border-radius: 5px; cursor: pointer; }
+    button:disabled { opacity: .6; cursor: wait; }
+    .album { border-top: 1px solid #e8e4df; padding: 18px 0; }
+    .album h3 { margin: 0 0 7px; font-size: 17px; }
+    .album p { margin: 0 0 10px; font-size: 14px; }
+    .album a { color: #51483f; text-decoration: underline; }
+    .album button { margin: 4px 8px 4px 0; padding: 8px 12px; font-size: 13px; }
+    .album .acciones { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+    .muted { font-size: 14px; color: #666; }
+    @media(max-width: 600px) { main { margin: 20px auto; padding: 16px; } h1 { font-size: 31px; } .panel { padding: 20px; } }
+  </style>
+</head>
+<body>
+  <main>
+    <p>SOLA · INVITACIONES</p>
+    <h1>Administración de álbumes</h1>
+    <div class="panel">
+      <h2>Crear nuevo álbum</h2>
+      <label for="adminKey">Clave de administración</label>
+      <input id="adminKey" type="password" autocomplete="off" placeholder="Clave configurada en Cloudflare">
+      <label for="nombre">Nombre del evento</label>
+      <input id="nombre" placeholder="Ej.: Lucía & Martín">
+      <label for="fecha">Fecha del evento</label>
+      <input id="fecha" type="date">
+      <button type="button" id="crearAlbum">Crear álbum</button>
+      <p id="resultado" role="status" aria-live="polite"></p>
+    </div>
+    <div class="panel">
+      <h2>Mis álbumes</h2>
+      <p class="muted">Consultá los álbumes que ya creaste y recuperá sus enlaces y códigos QR.</p>
+      <button type="button" id="verAlbumes">Ver mis álbumes</button>
+      <p id="estadoListado" role="status" aria-live="polite"></p>
+      <div id="listaAlbumes"></div>
+    </div>
+  </main>
+  <!-- La biblioteca genera el QR en el navegador: el enlace privado no se envía a un servicio generador de QR. -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js" referrerpolicy="no-referrer"></script>
+<script>
+  const resultado = document.getElementById("resultado");
+  const estadoListado = document.getElementById("estadoListado");
+  const listaAlbumes = document.getElementById("listaAlbumes");
+  const botonListar = document.getElementById("verAlbumes");
+  document.getElementById("crearAlbum").addEventListener("click", crearAlbum);
+  botonListar.addEventListener("click", listarAlbumes);
+
+  async function crearAlbum() {
+    const adminKey = document.getElementById("adminKey").value.trim();
+    const nombre = document.getElementById("nombre").value.trim();
+    const fecha = document.getElementById("fecha").value;
+    if (!adminKey || !nombre || !fecha) {
+      resultado.textContent = "Completá la clave de administración, el nombre y la fecha.";
+      return;
+    }
+    resultado.textContent = "Creando álbum...";
+    try {
+      const respuesta = await fetch("/admin/crear-album", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "X-Admin-Key": adminKey },
+        body: JSON.stringify({ nombre, fecha })
+      });
+      const datos = await respuesta.json();
+      if (!respuesta.ok) {
+        resultado.textContent = datos.error || "No se pudo crear el álbum.";
+        return;
+      }
+      resultado.replaceChildren();
+      const texto = document.createTextNode("Álbum creado: ");
+      const link = document.createElement("a");
+      link.href = datos.enlace;
+      link.textContent = "Abrir álbum";
+      link.target = "_blank";
+      link.rel = "noopener noreferrer";
+      resultado.append(texto, link);
+    } catch (e) {
+      resultado.textContent = "No se pudo conectar con el servidor.";
+    }
+  }
+
+  function fechaVisible(fecha) {
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(fecha || "")) return fecha || "Sin fecha";
+    const [a, m, d] = fecha.split("-");
+    return `${d}/${m}/${a}`;
+  }
+
+  function descargarQR(url, nombre) {
+    if (typeof QRCode === "undefined") {
+      throw new Error("No se pudo cargar el generador de QR. Comprobá tu conexión a Internet.");
+    }
+    const contenedor = document.createElement("div");
+    contenedor.style.cssText = "position:absolute;left:-9999px;top:0";
+    document.body.appendChild(contenedor);
+    try {
+      new QRCode(contenedor, {
+        text: url,
+        width: 1024,
+        height: 1024,
+        colorDark: "#000000",
+        colorLight: "#ffffff",
+        correctLevel: QRCode.CorrectLevel.M
+      });
+      const canvas = contenedor.querySelector("canvas");
+      if (!canvas) throw new Error("No se pudo generar la imagen QR.");
+      const descarga = document.createElement("a");
+      const nombreSeguro = (nombre || "album").normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-zA-Z0-9_-]+/g, "-").replace(/^-+|-+$/g, "").slice(0, 70) || "album";
+      descarga.download = `QR-${nombreSeguro}.png`;
+      descarga.href = canvas.toDataURL("image/png");
+      document.body.appendChild(descarga);
+      descarga.click();
+      descarga.remove();
+    } finally {
+      contenedor.remove();
+    }
+  }
+
+  async function listarAlbumes() {
+    const adminKey = document.getElementById("adminKey").value.trim();
+    if (!adminKey) {
+      estadoListado.textContent = "Ingresá primero tu clave de administración en el campo de arriba.";
+      return;
+    }
+    botonListar.disabled = true;
+    listaAlbumes.replaceChildren();
+    estadoListado.textContent = "Consultando álbumes...";
+    try {
+      const respuesta = await fetch("/admin/listar-albumes", {
+        method: "GET",
+        headers: { "X-Admin-Key": adminKey },
+        cache: "no-store"
+      });
+      const datos = await respuesta.json();
+      if (!respuesta.ok) {
+        estadoListado.textContent = datos.error || "No se pudieron consultar los álbumes.";
+        return;
+      }
+      if (!Array.isArray(datos.albumes)) {
+        estadoListado.textContent = "La respuesta no contiene un listado válido.";
+        return;
+      }
+      estadoListado.textContent = `${datos.albumes.length} álbum(es) encontrado(s).`;
+      for (const album of datos.albumes) {
+        const item = document.createElement("div");
+        item.className = "album";
+        const titulo = document.createElement("h3");
+        titulo.textContent = album.nombre || "Álbum sin nombre";
+        const fecha = document.createElement("p");
+        fecha.textContent = `Fecha del evento: ${fechaVisible(album.fecha)}`;
+        item.append(titulo, fecha);
+        if (album.enlace) {
+          const acciones = document.createElement("div");
+          acciones.className = "acciones";
+          const enlace = document.createElement("a");
+          enlace.href = album.enlace;
+          enlace.target = "_blank";
+          enlace.rel = "noopener noreferrer";
+          enlace.textContent = "Abrir álbum";
+          const copiar = document.createElement("button");
+          copiar.type = "button";
+          copiar.textContent = "Copiar enlace";
+          copiar.addEventListener("click", async () => {
+            try {
+              await navigator.clipboard.writeText(album.enlace);
+              copiar.textContent = "¡Copiado!";
+            } catch (e) {
+              copiar.textContent = "No se pudo copiar";
+            }
+          });
+          const qr = document.createElement("button");
+          qr.type = "button";
+          qr.textContent = "Descargar QR";
+          qr.addEventListener("click", () => {
+            try {
+              descargarQR(album.enlace, album.nombre);
+              qr.textContent = "QR descargado";
+            } catch (e) {
+              qr.textContent = "Error al generar QR";
+              estadoListado.textContent = e.message;
+            }
+          });
+          const limites = document.createElement('button');
+          limites.type='button';limites.textContent=`Capacidad: ${album.maxFotos??300} fotos / ${album.maxVideos??10} videos`;
+          limites.onclick=async()=>{
+            const f=prompt('Máximo de fotos (1 a 2000)',String(album.maxFotos??300));if(f===null)return;
+            const v=prompt('Máximo de videos (0 a 100)',String(album.maxVideos??10));if(v===null)return;
+            const maxFotos=Number(f),maxVideos=Number(v);
+            if(!Number.isInteger(maxFotos)||maxFotos<1||maxFotos>2000||!Number.isInteger(maxVideos)||maxVideos<0||maxVideos>100){alert('Valores inválidos');return;}
+            try{const r=await fetch('/admin/actualizar-limites',{method:'POST',headers:{'Content-Type':'application/json','X-Admin-Key':adminKey},body:JSON.stringify({id:album.id,maxFotos,maxVideos})});const d=await r.json();if(!r.ok)throw Error(d.error||'No se pudo guardar');album.maxFotos=maxFotos;album.maxVideos=maxVideos;limites.textContent=`Capacidad: ${maxFotos} fotos / ${maxVideos} videos`;alert('Capacidad actualizada');}catch(e){alert(e.message)}
+          };
+          const pareja=document.createElement('button');
+          pareja.type='button';pareja.textContent='Crear / renovar clave del organizador';
+          pareja.onclick=async()=>{
+            if(!confirm('¿Crear una clave privada nueva para este álbum? Si ya existe una, dejará de funcionar.'))return;
+            try{
+              const r=await fetch('/admin/clave-pareja',{method:'POST',headers:{'Content-Type':'application/json','X-Admin-Key':adminKey},body:JSON.stringify({id:album.id})});
+              const d=await r.json();if(!r.ok)throw Error(d.error||'No se pudo crear la clave');
+              // Mostrar una sola vez para copiarla y entregarla en privado a el organizador.
+              const texto='Clave privada para administrar el álbum '+album.nombre+': '+d.clavePareja;
+              try{await navigator.clipboard.writeText(texto);alert('Clave privada copiada al portapapeles. Guardala y compartila únicamente con el organizador.')}catch{prompt('Copiá y guardá esta clave privada; no se volverá a mostrar:',texto)}
+            }catch(e){alert(e.message)}
+          };
+          const editar = document.createElement('button');
+          editar.type = 'button';
+          editar.textContent = 'Editar nombre y fecha';
+          editar.addEventListener('click', async () => {
+            const nuevoNombre = prompt('Nombre del evento', album.nombre);
+            if (nuevoNombre === null) return;
+            const nuevaFecha = prompt('Fecha del evento (AAAA-MM-DD)', album.fecha);
+            if (nuevaFecha === null) return;
+            if (nuevoNombre.trim().length < 3 || nuevoNombre.trim().length > 120 || !/^\d{4}-\d{2}-\d{2}$/.test(nuevaFecha)) {
+              alert('Ingresá un nombre válido y una fecha con formato AAAA-MM-DD.'); return;
+            }
+            try {
+              const r = await fetch('/admin/editar-album', {
+                method: 'POST',
+                headers: {'Content-Type':'application/json','X-Admin-Key':adminKey},
+                body: JSON.stringify({id:album.id,nombre:nuevoNombre.trim(),fecha:nuevaFecha})
+              });
+              const d = await r.json();
+              if (!r.ok) throw new Error(d.error || 'No se pudo editar');
+              await listarAlbumes();
+            } catch (e) { alert(e.message); }
+          });
+          const eliminar = document.createElement('button');
+          eliminar.type = 'button';
+          eliminar.textContent = 'Eliminar álbum';
+          eliminar.addEventListener('click', async () => {
+            if (!confirm(`¿Eliminar definitivamente el álbum "${album.nombre}" y todos sus archivos y mensajes? Esta acción no se puede deshacer.`)) return;
+            if (prompt('Escribí ELIMINAR para confirmar') !== 'ELIMINAR') return;
+            try {
+              const r = await fetch('/admin/eliminar-album', {
+                method:'POST',
+                headers:{'Content-Type':'application/json','X-Admin-Key':adminKey},
+                body:JSON.stringify({id:album.id,confirmacion:'ELIMINAR'})
+              });
+              const d = await r.json();
+              if (!r.ok) throw new Error(d.error || 'No se pudo eliminar');
+              await listarAlbumes();
+            } catch (e) { alert(e.message); }
+          });
+          acciones.append(enlace, copiar, qr, limites, pareja, editar, eliminar);
+          item.append(acciones);
+        }
+        listaAlbumes.append(item);
+      }
+    } catch (e) {
+      estadoListado.textContent = "No se pudo conectar con el servidor.";
+    } finally {
+      botonListar.disabled = false;
+    }
+  }
+</script>
+</body>
+</html>

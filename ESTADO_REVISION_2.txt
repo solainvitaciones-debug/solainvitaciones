@@ -1,0 +1,6 @@
+REVISIÓN 2 - NO PUBLICAR
+1. Se incorporó functions/admin/actualizar-limites.js, la ruta faltante del botón Capacidad.
+2. Se documentó una propuesta para ampliar la limpieza programada a mensajes.
+3. NO se ha modificado el Worker activo de Cloudflare.
+4. NO se han realizado pruebas integradas con R2 ni de ejecución real.
+5. Quedan por comprobar compatibilidad, seguridad y comportamiento antes de publicar.

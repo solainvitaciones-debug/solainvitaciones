@@ -1,0 +1,207 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Sola Invitaciones · Álbum compartido</title>
+<style>
+:root{--cream:#F4F1EB;--ink:#4B4B4D;--sand:#C9B8A5}*{box-sizing:border-box}body{margin:0;background:var(--cream);color:var(--ink);font-family:Arial,sans-serif}header{padding:22px;text-align:center;letter-spacing:4px;font-size:13px;border-bottom:1px solid #d9d5cd}.wrap{max-width:950px;margin:auto;padding:40px 22px}h1{font-family:Georgia,serif;font-weight:400;font-size:clamp(40px,7vw,76px);margin:8px 0 10px;text-align:center}.eyebrow{text-align:center;letter-spacing:3px;font-size:11px;text-transform:uppercase}.intro{text-align:center;line-height:1.7;margin-bottom:28px}.actions{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-bottom:28px}button{border:1px solid var(--ink);padding:13px 21px;background:transparent;color:var(--ink);font-size:13px;cursor:pointer;border-radius:2px}.primary{background:var(--sand);border-color:var(--sand);font-weight:bold}button:disabled{opacity:.55;cursor:not-allowed}.grid{columns:3 200px;column-gap:12px}.photo{break-inside:avoid;margin-bottom:12px}.photo img{width:100%;display:block;object-fit:cover;border-radius:3px;cursor:pointer}.empty{padding:60px 20px;border:1px dashed #bcb7ae;text-align:center;line-height:1.7}.muted{font-size:12px;color:#76726c;text-align:center;margin:30px}input{display:none}.top{display:flex;justify-content:space-between;align-items:center;gap:15px;flex-wrap:wrap;margin-bottom:20px}.count{font-size:13px}.lightbox{position:fixed;inset:0;background:#151515ed;display:none;align-items:center;justify-content:center;z-index:3;padding:30px}.lightbox img{max-width:100%;max-height:85vh;object-fit:contain}.close{position:absolute;right:20px;top:20px;color:white;font-size:28px;background:transparent;border:0}.note{background:#fff9;padding:18px;margin-top:25px;font-size:12px;line-height:1.6}.download-photo{position:absolute;left:20px;bottom:20px;color:#fff;border:1px solid #fff;background:#222b;text-decoration:none;padding:12px 16px;font-size:13px;border-radius:3px}.status{text-align:center;font-size:13px;min-height:18px;margin:-12px 0 18px}
+</style>
+</head>
+<body><header>SOLA · INVITACIONES</header><main class="wrap"><p class="eyebrow">Álbum compartido · Demo</p><h1 id="eventoNombre">Álbum compartido</h1><p class="intro">Los mejores momentos los construimos entre todos.<br>Compartí tus fotos y reviví cada instante.</p><div class="actions"><button class="primary" id="upload">+ Subir fotos o videos</button><button id="project">Proyectar álbum</button><button id="pareja">Administrar mi álbum</button><button id="descargarAlbum" style="display:none">Descargar álbum completo (ZIP)</button></div><p id="status" class="status" role="status" aria-live="polite"></p><input id="files" type="file" accept="image/jpeg,image/png,image/webp,video/mp4" multiple><div class="top"><strong>Nuestros momentos</strong><span class="count" id="count">0 fotografías</span></div><div id="gallery" class="grid"></div><h2 id="videosTitle" style="display:none;font-family:Georgia,serif;font-weight:400">Videos compartidos</h2><div id="videosGallery" class="grid"></div><div id="empty" class="empty">Todavía no hay fotografías.<br>¡Sé la primera persona en compartir un recuerdo!</div><p class="muted">Las fotografías estarán disponibles hasta 30 días después del evento.</p><div class="note"><strong>Álbum compartido:</strong> Subí tus fotografías y compartí los mejores momentos del evento. Las imágenes estarán disponibles para verlas hasta 30 días después de la celebración.</div>
+
+<section id="seccionMensajes" style="margin-top:35px">
+  <h2>Dejanos tu mensaje</h2>
+  <p>Compartí tus buenos deseos con los protagonistas.</p>
+
+  <form id="formMensajes">
+   <input id="nombreMensaje" type="text" style="display:block;width:100%;box-sizing:border-box;padding:12px;border:1px solid #C9B8A5;border-radius:5px"
+  placeholder="Tu nombre" maxlength="80" required>
+
+    <textarea id="textoMensaje" style="width:100%;min-height:120px;box-sizing:border-box;padding:12px;border:1px solid #C9B8A5;border-radius:5px;font-family:inherit;resize:vertical"
+      placeholder="Escribí tu mensaje..."
+      maxlength="1000" required></textarea>
+
+    <button type="submit" style="background:#C9B8A5;color:#333;border:none;padding:14px 28px;border-radius:5px;cursor:pointer;font-family:inherit">Enviar mensaje</button>
+  </form>
+
+  <p id="estadoMensaje" role="status"></p>
+
+  <h3>Mensajes compartidos</h3>
+  <div id="listaMensajes"></div>
+</section>
+</main><div class="lightbox" id="lightbox"><button class="close" id="close" aria-label="Cerrar">×</button><img id="large" alt="Foto ampliada"><a id="descargarFoto" class="download-photo" href="#" download>Descargar foto</a></div>
+<script>
+const images=[];let videos=[];let clavePareja="";let projecting=false,idx=0,timer=null,loading=false;
+const input=document.getElementById('files'),gallery=document.getElementById('gallery'),empty=document.getElementById('empty'),count=document.getElementById('count'),lightbox=document.getElementById('lightbox'),large=document.getElementById('large'),status=document.getElementById('status'),upload=document.getElementById('upload');
+document.getElementById('pareja').onclick=()=>{
+ if(clavePareja){clavePareja='';document.getElementById('descargarAlbum').style.display='none';document.getElementById('pareja').textContent='Administrar mi álbum';cargarFotos();cargarVideos();cargarMensajes();return;}
+ const clave=prompt('Ingresá la clave privada del organizador (no la clave del enlace):');
+ if(!clave)return;
+ if(!/^[a-f0-9]{48}$/i.test(clave.trim())){alert('La clave privada no tiene el formato correcto');return;}
+ clavePareja=clave.trim();document.getElementById('descargarAlbum').style.display='inline-block';document.getElementById('pareja').textContent='Salir de administración';cargarFotos();cargarVideos();cargarMensajes();
+};
+document.getElementById('descargarAlbum').onclick=async()=>{
+ if(!clavePareja)return;
+ const boton=document.getElementById('descargarAlbum');boton.disabled=true;
+ status.textContent='Preparando la descarga del álbum…';
+ try{
+  // En computadoras se escribe el ZIP por streaming; Android necesita una descarga alternativa.
+  const escritorio=typeof window.showSaveFilePicker==='function' && !/Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+  let handle=null;
+  if(escritorio){
+    handle=await window.showSaveFilePicker({suggestedName:'Album-completo.zip',types:[{description:'Archivo ZIP',accept:{'application/zip':['.zip']}}]});
+  }
+  const r=await fetch('/descargar-album'+parametros,{method:'POST',headers:{'X-Pareja-Key':clavePareja}});
+  if(!r.ok){const d=await r.json().catch(()=>({}));throw Error(d.error||'No se pudo descargar el álbum');}
+  if(!r.body)throw Error('El navegador no permite esta descarga');
+  if(escritorio){
+    const file=await handle.createWritable();
+    try{await r.body.pipeTo(file)}catch(e){await file.abort().catch(()=>{});throw e}
+  }else{
+    // Alternativa para Android: Blob + enlace de descarga. Limitada para evitar agotar memoria.
+    const limite=80*1024*1024;
+    const lector=r.body.getReader();const partes=[];let total=0;
+    try{
+      while(true){
+        const {done,value}=await lector.read();if(done)break;
+        total+=value.byteLength;
+        if(total>limite){await lector.cancel();throw Error('Este álbum supera los 80 MB. Para descargarlo completo, usá una computadora por ahora.');}
+        partes.push(value);
+        status.textContent='Preparando descarga: '+(total/1048576).toFixed(1)+' MB…';
+      }
+    }finally{lector.releaseLock()}
+    const blob=new Blob(partes,{type:'application/zip'});
+    const url=URL.createObjectURL(blob);
+    const enlace=document.createElement('a');enlace.href=url;enlace.download='Album-completo.zip';
+    document.body.appendChild(enlace);enlace.click();enlace.remove();
+    setTimeout(()=>URL.revokeObjectURL(url),120000);
+  }
+  status.textContent='Álbum completo guardado correctamente.';
+ }catch(e){if(e.name!=='AbortError')status.textContent='Descarga: '+e.message;}
+ finally{boton.disabled=false}
+};
+async function eliminarArchivo(tipo,nombre){
+ if(!clavePareja)return;
+ if(!confirm('¿Eliminar este archivo definitivamente? No se puede recuperar.'))return;
+ try{
+ const r=await fetch('/eliminar-archivo'+parametros,{method:'POST',headers:{'Content-Type':'application/json','X-Pareja-Key':clavePareja},body:JSON.stringify({tipo,nombre})});
+ const d=await r.json();if(!r.ok)throw Error(d.error||'No se pudo eliminar');
+ status.textContent='Archivo eliminado';await Promise.all([cargarFotos(),cargarVideos()]);
+ }catch(e){alert(e.message)}
+}
+function show(url){large.src=url;document.getElementById('descargarFoto').href=url+'&descargar=1';lightbox.style.display='flex'}
+function stop(){clearInterval(timer);timer=null;projecting=false;lightbox.style.display='none'}
+document.getElementById('close').onclick=stop;
+lightbox.onclick=e=>{if(e.target===lightbox)stop()};
+document.addEventListener('keydown',e=>{if(e.key==='Escape')stop()});
+document.getElementById('project').onclick=()=>{if(!images.length){alert('Todavía no hay fotografías para proyectar.');return}projecting=true;idx=0;show(images[idx]);clearInterval(timer);timer=setInterval(()=>{if(!projecting||!images.length)return;idx=(idx+1)%images.length;large.src=images[idx];document.getElementById('descargarFoto').href=images[idx]+'&descargar=1'},3500)};
+upload.onclick=()=>input.click();
+function comprobarDuracion(archivo){return new Promise((resolve,reject)=>{const video=document.createElement('video');const url=URL.createObjectURL(archivo);const limpiar=()=>{video.removeAttribute('src');video.load();URL.revokeObjectURL(url)};video.preload='metadata';video.onloadedmetadata=()=>{const segundos=video.duration;limpiar();Number.isFinite(segundos)&&segundos>0&&segundos<=30?resolve():reject(new Error('El video debe durar como máximo 30 segundos'))};video.onerror=()=>{limpiar();reject(new Error('No se pudo verificar la duración del video'))};video.src=url})}
+async function cargarFotos(){if(loading)return;loading=true;try{const respuesta=await fetch('/fotos'+parametros,{cache:'no-store'});if(!respuesta.ok)throw new Error('No se pudo cargar el álbum');const datos=await respuesta.json();document.getElementById('eventoNombre').textContent=datos.nombreEvento||'Álbum compartido';const nuevas=(datos.fotos||[]).map(f=>f.url);if(images.length!==nuevas.length||images.some((url,i)=>url!==nuevas[i])||gallery.dataset.admin!==(clavePareja?"1":"0")){gallery.dataset.admin=clavePareja?"1":"0";images.splice(0,images.length,...nuevas);gallery.replaceChildren();for(const url of images){const div=document.createElement('div');div.className='photo';const img=document.createElement('img');img.src=url;img.alt='Fotografía compartida';img.loading='lazy';img.onclick=()=>show(url);div.appendChild(img);if(clavePareja){const b=document.createElement('button');b.textContent='Eliminar foto';b.style.marginTop='6px';b.onclick=()=>{const nombre=new URL(url,location.origin).searchParams.get('nombre');eliminarArchivo('foto',nombre)};div.appendChild(b)}gallery.appendChild(div)}count.textContent=images.length+' fotografía'+(images.length===1?'':'s');empty.style.display=images.length?'none':'block'}}catch(error){console.error(error);status.textContent='No se pudo actualizar la galería. Intentaremos nuevamente.'}finally{loading=false}}
+input.onchange=async()=>{const archivos=[...input.files];if(!archivos.length)return;upload.disabled=true;let errores=[];for(const archivo of archivos){const esVideo=archivo.type==='video/mp4';if(esVideo?archivo.size>25*1024*1024:(!['image/jpeg','image/png','image/webp'].includes(archivo.type)||archivo.size>20*1024*1024)){errores.push(archivo.name+': formato o tamaño inválido (foto 20 MB, video 25 MB)');continue}try{if(esVideo)await comprobarDuracion(archivo);status.textContent='Subiendo '+archivo.name+'…';const respuesta=await fetch((esVideo?'/videos':'/fotos')+parametros,{method:'POST',headers:{'Content-Type':archivo.type},body:archivo});if(!respuesta.ok){let mensaje='Error al subir';try{mensaje=(await respuesta.json()).error||mensaje}catch{}throw new Error(mensaje)}}catch(error){errores.push(archivo.name+': '+error.message)}}input.value='';upload.disabled=false;await Promise.all([cargarFotos(),cargarVideos()]);status.textContent=errores.length?errores.join(' | '):'¡Archivos compartidos correctamente!'};
+const qs=new URLSearchParams(window.location.search);const ruta=decodeURIComponent(window.location.pathname.replace(/^\/+|\/+$/g,''));if(ruta&&!qs.has('evento'))qs.set('evento',ruta);const parametros='?'+qs.toString();if(!qs.has('evento')||!qs.has('clave')){document.getElementById('eventoNombre').textContent='Enlace de álbum incompleto';status.textContent='Abrí el enlace completo que incluye la clave del evento.';upload.disabled=true;document.getElementById('project').disabled=true;}else{cargarFotos();cargarVideos();setInterval(()=>{cargarFotos();cargarVideos()},10000);}
+
+async function cargarVideos(){try{const cont=document.getElementById('videosGallery');const r=await fetch('/videos'+parametros,{cache:'no-store'});if(!r.ok)throw Error('No se pudieron cargar videos');const d=await r.json();const nuevas=d.videos||[];if(JSON.stringify(nuevas.map(v=>v.url))===JSON.stringify(videos.map(v=>v.url))&&cont.dataset.admin===(clavePareja?"1":"0"))return;videos=nuevas;cont.dataset.admin=clavePareja?'1':'0';cont.replaceChildren();document.getElementById('videosTitle').style.display=videos.length?'block':'none';for(const v of videos){const item=document.createElement('div');const vid=document.createElement('video');vid.src=v.url;vid.controls=true;vid.preload='metadata';vid.playsInline=true;vid.style.cssText='width:100%;background:#222;border-radius:3px';item.appendChild(vid);if(clavePareja){const b=document.createElement('button');b.textContent='Eliminar video';b.onclick=()=>eliminarArchivo('video',v.nombre);item.appendChild(b)}cont.appendChild(item)}}catch(e){console.error(e)}}
+
+
+// MENSAJES DE LOS INVITADOS
+const formularioMensajes = document.getElementById("formMensajes");
+const listaMensajes = document.getElementById("listaMensajes");
+const estadoMensaje = document.getElementById("estadoMensaje");
+
+async function cargarMensajes() {
+  try {
+    const respuesta = await fetch("/mensajes" + location.search);
+    if (!respuesta.ok) throw new Error("No se pudieron cargar los mensajes");
+
+    const datos = await respuesta.json();
+    listaMensajes.replaceChildren();
+
+    for (const mensaje of datos.mensajes) {
+      const tarjeta = document.createElement("div");
+      tarjeta.style.cssText =
+        "padding:15px;margin:12px 0;background:#F4F1EB;border-radius:8px";
+
+      const nombre = document.createElement("strong");
+      nombre.textContent = mensaje.nombre;
+
+      const texto = document.createElement("p");
+      texto.textContent = mensaje.texto;
+      texto.style.whiteSpace = "pre-wrap";
+
+      
+if (clavePareja) {
+  const botonEliminar = document.createElement("button");
+  botonEliminar.textContent = "Eliminar mensaje";
+  botonEliminar.style.cssText =
+    "background:#C9B8A5;color:#333;border:none;padding:8px 14px;border-radius:5px;cursor:pointer;margin-top:8px";
+
+  botonEliminar.addEventListener("click", async () => {
+    if (!confirm("¿Querés eliminar este mensaje?")) return;
+
+    try {
+      const respuesta = await fetch("/eliminar-mensaje" + location.search, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "X-Pareja-Key": clavePareja
+        },
+        body: JSON.stringify({ id: mensaje.id })
+      });
+
+      const datos = await respuesta.json();
+
+      if (!respuesta.ok) {
+        throw new Error(datos.error || "No se pudo eliminar el mensaje");
+      }
+
+      await cargarMensajes();
+    } catch (error) {
+      alert(error.message);
+    }
+  });
+
+  tarjeta.appendChild(botonEliminar);
+}
+tarjeta.prepend(nombre, texto);
+      listaMensajes.appendChild(tarjeta);
+    }
+  } catch (error) {
+    estadoMensaje.textContent = error.message;
+  }
+}
+
+formularioMensajes.addEventListener("submit", async (evento) => {
+  evento.preventDefault();
+
+  const boton = formularioMensajes.querySelector("button");
+  boton.disabled = true;
+  estadoMensaje.textContent = "Enviando mensaje...";
+
+  try {
+    const respuesta = await fetch("/mensajes" + location.search, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        nombre: document.getElementById("nombreMensaje").value,
+        texto: document.getElementById("textoMensaje").value
+      })
+    });
+
+    const datos = await respuesta.json();
+    if (!respuesta.ok) {
+      throw new Error(datos.error || "No se pudo enviar el mensaje");
+    }
+
+    formularioMensajes.reset();
+    estadoMensaje.textContent = "¡Mensaje enviado correctamente!";
+    await cargarMensajes();
+  } catch (error) {
+    estadoMensaje.textContent = error.message;
+  } finally {
+    boton.disabled = false;
+  }
+});
+
+cargarMensajes();
+</script></body></html>

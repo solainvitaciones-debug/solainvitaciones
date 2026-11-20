@@ -1,0 +1,12 @@
+SOLA INVITACIONES - ETAPA ELIMINACION PARA NOVIOS - SOLO PROYECTO DE PRUEBA
+
+NO PUBLICAR EN EL ALBUM ORIGINAL.
+
+Incluye los archivos completos de la version de videos mas acceso privado de novios.
+En el administrador: Ver mis albumes > Crear / renovar clave de los novios. Copiarla y guardarla: se muestra una sola vez.
+En el album: Administrar archivos (novios), ingresar clave privada, y usar Eliminar foto/video.
+Las claves no se comparten en la URL del album. La eliminacion es permanente en R2.
+
+LIMITACIONES: sin pruebas de integracion reales; el limite de 10 videos conserva la condicion de carrera ya aceptada; no se incluye descarga completa.
+
+PUBLICACION DE PRUEBA: desde la carpeta raiz del proyecto con Wrangler, nunca carga directa por navegador.

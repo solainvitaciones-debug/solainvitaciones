@@ -1,0 +1,8 @@
+SOLA INVITACIONES - REVISIÓN 3 - NO PUBLICAR
+
+Se verificó sintaxis de los 15 archivos JS de Functions.
+Se corrigió finAlbum en functions/admin/crear-album.js: ahora vence al inicio del día 31 posterior al evento, hora Argentina, alineado con el Worker mostrado por la usuaria.
+
+ATENCIÓN: No hay pruebas de integración ni publicación. No conectar a bucket real.
+Pendiente: comprobar mensajes y su borrado programado; pruebas aisladas con bucket nuevo; verificar límites y acceso privado; comprobar referencias a EVENTOS de demostración en functions/_eventos.js (incluye claves fijas de prueba) y evitar exposición en producción.
+No se modificó Cloudflare ni los respaldos previos.

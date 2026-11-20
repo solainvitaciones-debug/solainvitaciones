@@ -1,0 +1,31 @@
+PROPUESTA DE MODIFICACIÓN DEL WORKER EXISTENTE — NO PUBLICAR DIRECTAMENTE
+
+En la función revisar(bucket, eliminar), reemplazar el bloque que obtiene las fotos
+por la obtención de DOS prefijos, sin cambiar la lógica de fecha ni de autorización:
+
+const prefijoAlbum = `${FOTOS}${id}/`;
+const prefijoMensajes = `mensajes/${id}/`;
+const fotos = await listarTodo(bucket, prefijoAlbum);
+const mensajes = await listarTodo(bucket, prefijoMensajes);
+if (fotos.some(f => !f.key.startsWith(prefijoAlbum)) ||
+    mensajes.some(m => !m.key.startsWith(prefijoMensajes))) {
+  throw new Error('Objeto fuera del álbum');
+}
+registro.fotografias = fotos.length;
+registro.mensajes = mensajes.length;
+
+En el bloque de eliminación, ANTES de eliminar config/albumes/<id>.json:
+
+for (const objeto of [...fotos, ...mensajes]) {
+  await bucket.delete(objeto.key);
+}
+const pendientes = [
+  ...await listarTodo(bucket, prefijoAlbum),
+  ...await listarTodo(bucket, prefijoMensajes)
+];
+if (pendientes.length) throw new Error('Quedan archivos pendientes');
+await bucket.delete(archivo.key);
+
+NOTAS: este archivo es una propuesta de cambio, NO es un Worker ejecutable.
+Antes de modificar el Worker real, respaldar el código desplegado, comprobar
+las claves y prefijos de R2 y ensayar en un entorno de prueba aislado.

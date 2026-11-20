@@ -1,0 +1,10 @@
+SOLA INVITACIONES - COPIA DE TRABAJO NO PUBLICAR
+
+Base: Sola_Album_Organizador_Descarga_PRUEBA.
+Archivos añadidos desde V4: functions/admin/editar-album.js y eliminar-album.js.
+
+ADVERTENCIA: Copia de inventario/integración inicial. No se ha verificado compatibilidad de rutas, credenciales, formatos de datos, interfaz administrativa, descarga ni eliminación. No publicar ni ejecutar sobre datos reales sin pruebas aisladas.
+La limpieza automática es un Worker separado y no se incluye en esta copia.
+Los respaldos originales no se modificaron.
+
+REVISION 05-11-2026: Se añadieron botones para editar nombre/fecha y eliminar álbum al administrador de la copia, conectados a sus endpoints existentes. No se ha desplegado ni probado en Cloudflare. La ruta /admin/actualizar-limites se invoca desde la interfaz pero no está presente en esta copia; pendiente de recuperar/verificar. La compatibilidad de todo el conjunto permanece pendiente de pruebas aisladas.
