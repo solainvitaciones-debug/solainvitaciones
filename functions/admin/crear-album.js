@@ -52,15 +52,30 @@ export async function onRequestPost({ request, env }) {
     const finAlbum = new Date(`${fecha}T00:00:00-03:00`);
     finAlbum.setUTCDate(finAlbum.getUTCDate() + 31);
 
+    const maxFotos = Number.isInteger(Number(datos.maxFotos)) && Number(datos.maxFotos) >= 1 && Number(datos.maxFotos) <= 2000
+      ? Number(datos.maxFotos)
+      : 300;
+    const maxVideos = Number.isInteger(Number(datos.maxVideos)) && Number(datos.maxVideos) >= 0 && Number(datos.maxVideos) <= 100
+      ? Number(datos.maxVideos)
+      : 10;
+
+    // Generar automáticamente la clave privada de anfitriones al crear el álbum
+    const bytesPareja = new Uint8Array(24);
+    crypto.getRandomValues(bytesPareja);
+    const clavePareja = Array.from(bytesPareja, b => b.toString(16).padStart(2, "0")).join("");
+    const digestPareja = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(clavePareja));
+    const claveParejaHash = Array.from(new Uint8Array(digestPareja), b => b.toString(16).padStart(2, "0")).join("");
+
     const album = {
       id,
       nombre,
       fecha,
       clave: claveAlbum,
+      claveParejaHash,
       cierreCarga: cierreCarga.toISOString(),
       finAlbum: finAlbum.toISOString(),
-      maxFotos: 300,
-      maxVideos: 10,
+      maxFotos,
+      maxVideos,
       creado: new Date().toISOString()
     };
 
@@ -81,8 +96,12 @@ export async function onRequestPost({ request, env }) {
 
     return Response.json({
       correcto: true,
+      id,
       nombre,
       fecha,
+      maxFotos,
+      maxVideos,
+      clavePareja,
       enlace
     });
   } catch {

@@ -2,306 +2,1079 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Administración | Sola Invitaciones</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Panel de Administración · Sola Invitaciones</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
-    body { margin: 0; background: #F4F1EB; color: #4B4B4D; font-family: Arial, sans-serif; }
-    main { max-width: 650px; margin: 60px auto; padding: 24px; }
-    h1 { font-family: Georgia, serif; font-size: 38px; }
-    .panel { background: white; padding: 28px; border-radius: 12px; margin-bottom: 24px; }
-    label { display: block; margin-top: 18px; }
-    input { box-sizing: border-box; width: 100%; padding: 12px; margin-top: 7px; border: 1px solid #ccc; border-radius: 5px; }
-    button { margin-top: 24px; padding: 14px 24px; background: #C9B8A5; color: #292929; border: none; border-radius: 5px; cursor: pointer; }
-    button:disabled { opacity: .6; cursor: wait; }
-    .album { border-top: 1px solid #e8e4df; padding: 18px 0; }
-    .album h3 { margin: 0 0 7px; font-size: 17px; }
-    .album p { margin: 0 0 10px; font-size: 14px; }
-    .album a { color: #51483f; text-decoration: underline; }
-    .album button { margin: 4px 8px 4px 0; padding: 8px 12px; font-size: 13px; }
-    .album .acciones { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
-    .muted { font-size: 14px; color: #666; }
-    @media(max-width: 600px) { main { margin: 20px auto; padding: 16px; } h1 { font-size: 31px; } .panel { padding: 20px; } }
+    :root {
+      --sola-bg-canvas: #FAF8F5;
+      --sola-bg-surface: #FFFFFF;
+      --sola-bg-pill: #EFECE6;
+      --sola-bg-subtle: #F4F1EA;
+      --sola-text-main: #252525;
+      --sola-text-muted: #7A7670;
+      --sola-text-light: #A4A099;
+      --sola-primary-olive: #3B3E32;
+      --sola-primary-hover: #2B2E24;
+      --sola-primary-text: #FFFFFF;
+      --sola-accent-sand: #C9B8A5;
+      --sola-border-light: #E7E3DC;
+      --sola-shadow-card: 0 12px 36px rgba(40, 35, 25, 0.06);
+      --sola-shadow-btn: 0 8px 24px rgba(59, 62, 50, 0.18);
+    }
+
+    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+    body {
+      margin: 0;
+      padding: 0;
+      background: var(--sola-bg-canvas);
+      color: var(--sola-text-main);
+      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+      min-height: 100vh;
+    }
+
+    .admin-header {
+      background: linear-gradient(180deg, #ECE5D8 0%, #FAF8F5 100%);
+      padding: 36px 20px 20px;
+      text-align: center;
+      border-bottom: 1px solid var(--sola-border-light);
+    }
+
+    .admin-header img {
+      height: 36px;
+      opacity: 0.9;
+      margin-bottom: 12px;
+    }
+
+    .admin-header h1 {
+      font-size: clamp(24px, 5vw, 32px);
+      font-weight: 700;
+      margin: 0 0 6px;
+      letter-spacing: -0.02em;
+      color: var(--sola-text-main);
+    }
+
+    .heart-divider {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 14px;
+      margin: 8px 0;
+    }
+    .heart-divider .line {
+      width: 44px;
+      height: 1px;
+      background: var(--sola-border-light);
+    }
+    .heart-divider .heart {
+      color: var(--sola-text-muted);
+      font-size: 14px;
+    }
+
+    .admin-badge {
+      font-size: 11.5px;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--sola-text-muted);
+      font-weight: 600;
+      margin: 0;
+    }
+
+    main {
+      max-width: 780px;
+      margin: 0 auto;
+      padding: 24px 18px 80px;
+    }
+
+    .panel {
+      background: var(--sola-bg-surface);
+      padding: 26px 24px;
+      border-radius: 26px;
+      margin-bottom: 22px;
+      box-shadow: var(--sola-shadow-card);
+      border: 1px solid var(--sola-border-light);
+    }
+
+    .panel-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-bottom: 14px;
+    }
+
+    .panel h2 {
+      margin: 0;
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--sola-text-main);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .step-pill {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      background: var(--sola-bg-pill);
+      color: var(--sola-primary-olive);
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    label {
+      display: block;
+      margin-top: 14px;
+      margin-bottom: 6px;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--sola-text-main);
+    }
+
+    input[type="text"],
+    input[type="password"],
+    input[type="date"],
+    input[type="number"],
+    input:not([type]) {
+      width: 100%;
+      padding: 12px 15px;
+      border: 1px solid var(--sola-border-light);
+      border-radius: 14px;
+      background: var(--sola-bg-subtle);
+      color: var(--sola-text-main);
+      font-family: inherit;
+      font-size: 14px;
+      transition: border-color .2s, background .2s;
+    }
+
+    input:focus {
+      outline: none;
+      border-color: var(--sola-primary-olive);
+      background: var(--sola-bg-surface);
+    }
+
+    .form-grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+    @media (max-width: 560px) {
+      .form-grid-2 { grid-template-columns: 1fr; }
+      .panel { padding: 20px 16px; border-radius: 22px; }
+    }
+
+    /* BUTTONS */
+    button {
+      font-family: inherit;
+      cursor: pointer;
+      transition: all .2s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    button:disabled {
+      opacity: 0.6;
+      cursor: wait;
+      transform: none !important;
+    }
+
+    .btn-primary {
+      background: var(--sola-primary-olive);
+      color: var(--sola-primary-text);
+      border: none;
+      padding: 12px 22px;
+      border-radius: 999px;
+      font-size: 14px;
+      font-weight: 600;
+      box-shadow: var(--sola-shadow-btn);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+    .btn-primary:hover {
+      background: var(--sola-primary-hover);
+      transform: translateY(-1px);
+    }
+
+    .btn-secondary {
+      background: var(--sola-bg-pill);
+      color: var(--sola-text-main);
+      border: 1px solid var(--sola-border-light);
+      padding: 10px 16px;
+      border-radius: 999px;
+      font-size: 13px;
+      font-weight: 600;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+    .btn-secondary:hover {
+      background: var(--sola-accent-sand);
+      border-color: var(--sola-accent-sand);
+      color: #1F1F1F;
+    }
+
+    .btn-sand {
+      background: var(--sola-accent-sand);
+      color: #252525;
+      border: none;
+      padding: 10px 16px;
+      border-radius: 999px;
+      font-size: 13px;
+      font-weight: 600;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .btn-sand:hover {
+      filter: brightness(0.95);
+    }
+
+    .btn-danger-outline {
+      background: transparent;
+      color: #b94a48;
+      border: 1px solid #e6c5c4;
+      padding: 8px 14px;
+      border-radius: 999px;
+      font-size: 12.5px;
+      font-weight: 600;
+    }
+    .btn-danger-outline:hover {
+      background: #fdf2f2;
+      border-color: #b94a48;
+    }
+
+    .muted {
+      font-size: 13.5px;
+      color: var(--sola-text-muted);
+      margin: 4px 0 14px;
+      line-height: 1.5;
+    }
+
+    /* FICHA DE ENTREGA AL CLIENTE */
+    .client-delivery-box {
+      margin-top: 16px;
+      background: var(--sola-bg-subtle);
+      border: 1px solid var(--sola-accent-sand);
+      border-radius: 18px;
+      padding: 18px;
+      display: none;
+    }
+    .client-delivery-box.show { display: block; }
+    .client-delivery-box h4 {
+      margin: 0 0 8px;
+      font-size: 15px;
+      color: var(--sola-primary-olive);
+    }
+    .client-delivery-box pre {
+      background: var(--sola-bg-surface);
+      border: 1px solid var(--sola-border-light);
+      border-radius: 12px;
+      padding: 12px;
+      font-family: inherit;
+      font-size: 13px;
+      white-space: pre-wrap;
+      word-break: break-all;
+      color: var(--sola-text-main);
+      margin: 0 0 12px;
+      line-height: 1.55;
+    }
+
+    /* ALBUM CARDS IN LIST */
+    .search-bar-wrap {
+      margin: 14px 0 18px;
+      display: none;
+    }
+    .album-card {
+      background: var(--sola-bg-subtle);
+      border: 1px solid var(--sola-border-light);
+      border-radius: 20px;
+      padding: 18px 20px;
+      margin-bottom: 14px;
+      transition: border-color .2s;
+    }
+    .album-card:hover {
+      border-color: var(--sola-accent-sand);
+    }
+    .album-top {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-bottom: 8px;
+    }
+    .album-card h3 {
+      margin: 0;
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--sola-text-main);
+    }
+    .badges-row {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+    .status-badge {
+      font-size: 11.5px;
+      font-weight: 600;
+      padding: 4px 10px;
+      border-radius: 999px;
+      background: var(--sola-bg-surface);
+      border: 1px solid var(--sola-border-light);
+      color: var(--sola-text-muted);
+    }
+    .status-badge.ok {
+      background: #eef5ee;
+      border-color: #c7dfc8;
+      color: #2b5e2e;
+    }
+    .status-badge.warn {
+      background: #fdf6ec;
+      border-color: #ebd6b5;
+      color: #8a5a19;
+    }
+    .album-meta {
+      font-size: 13px;
+      color: var(--sola-text-muted);
+      margin: 0 0 14px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 14px;
+    }
+    .acciones {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 8px;
+      padding-top: 12px;
+      border-top: 1px solid var(--sola-border-light);
+    }
+    .btn-link-open {
+      background: var(--sola-primary-olive);
+      color: #fff !important;
+      text-decoration: none !important;
+      padding: 8px 15px;
+      border-radius: 999px;
+      font-size: 12.5px;
+      font-weight: 600;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+    }
+    .btn-link-open:hover {
+      background: var(--sola-primary-hover);
+    }
+    .acciones button {
+      padding: 8px 13px;
+      font-size: 12.5px;
+      border-radius: 999px;
+    }
+
+    /* TOAST */
+    .toast-msg {
+      position: fixed;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%) translateY(20px);
+      background: #232420f2;
+      color: #fff;
+      padding: 12px 22px;
+      border-radius: 999px;
+      font-size: 13px;
+      font-weight: 500;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+      z-index: 9999;
+      opacity: 0;
+      pointer-events: none;
+      transition: all .3s cubic-bezier(0.16, 1, 0.3, 1);
+      max-width: 90%;
+      text-align: center;
+    }
+    .toast-msg.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
   </style>
 </head>
 <body>
+
+  <header class="admin-header">
+    <img src="/assets/logo-sola-completo.png" alt="Sola Invitaciones Digitales">
+    <h1>Administración de Álbumes</h1>
+    <div class="heart-divider" aria-hidden="true">
+      <span class="line"></span>
+      <span class="heart">♡</span>
+      <span class="line"></span>
+    </div>
+    <p class="admin-badge">Panel exclusivo · Sola Studio</p>
+  </header>
+
   <main>
-    <p>SOLA · INVITACIONES</p>
-    <h1>Administración de álbumes</h1>
-    <div class="panel">
-      <h2>1. Clave de administración</h2>
-      <label for="adminKey">Ingresá tu clave para crear o gestionar tus álbumes</label>
-      <div style="display:flex;gap:8px;align-items:center;margin-top:7px">
-        <input id="adminKey" type="password" autocomplete="off" placeholder="Clave configurada en Cloudflare" style="margin-top:0;flex:1">
-        <button type="button" id="toggleClave" style="margin-top:0;padding:12px 14px;background:#e8e4df;font-size:13px;white-space:nowrap">👁️ Ver clave</button>
+    <!-- 1. ACCESO -->
+    <section class="panel">
+      <div class="panel-header">
+        <h2><span class="step-pill">1</span> Clave de administración</h2>
+        <button type="button" id="btnCerrarSesion" class="btn-secondary" style="display:none;padding:6px 12px;font-size:12px">Cerrar sesión</button>
       </div>
-      <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:14px">
-        <button type="button" id="ingresarVer" style="margin-top:0;background:#3B3E32;color:#fff;font-weight:bold">Ingresar y ver mis álbumes</button>
+      <p class="muted">Ingresá tu clave maestra para crear álbumes nuevos o gestionar los eventos activos.</p>
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+        <input id="adminKey" type="password" autocomplete="off" placeholder="Clave maestra de administración" style="flex:1;min-width:210px">
+        <button type="button" id="toggleClave" class="btn-secondary">👁️ Ver clave</button>
+        <button type="button" id="ingresarVer" class="btn-primary">Ingresar y ver álbumes</button>
       </div>
-      <p id="estadoLogin" role="status" aria-live="polite" style="margin-top:10px;font-weight:bold"></p>
-    </div>
-    <div class="panel">
-      <h2>2. Crear nuevo álbum</h2>
-      <label for="nombre">Nombre del evento</label>
-      <input id="nombre" placeholder="Ej.: Lucía & Martín">
-      <label for="fecha">Fecha del evento</label>
-      <input id="fecha" type="date">
-      <button type="button" id="crearAlbum">Crear álbum</button>
-      <p id="resultado" role="status" aria-live="polite"></p>
-    </div>
-    <div class="panel" id="panelListado">
-      <h2>3. Mis álbumes</h2>
-      <p class="muted">Consultá los álbumes que ya creaste y recuperá sus enlaces y códigos QR.</p>
-      <button type="button" id="verAlbumes">Actualizar lista de álbumes</button>
-      <p id="estadoListado" role="status" aria-live="polite"></p>
+      <p id="estadoLogin" role="status" aria-live="polite" style="margin:12px 0 0;font-size:13.5px;font-weight:600"></p>
+    </section>
+
+    <!-- 2. CREAR NUEVO ÁLBUM -->
+    <section class="panel">
+      <div class="panel-header">
+        <h2><span class="step-pill">2</span> Crear nuevo álbum</h2>
+      </div>
+      <p class="muted">Al crear el álbum se generan automáticamente su enlace, su código QR y la clave privada para los anfitriones.</p>
+
+      <div class="form-grid-2">
+        <div>
+          <label for="nombre">Nombre del evento</label>
+          <input id="nombre" type="text" placeholder="Ej.: Cumple 15 Emma / Lucía & Martín">
+        </div>
+        <div>
+          <label for="fecha">Fecha del evento</label>
+          <input id="fecha" type="date">
+        </div>
+      </div>
+
+      <div class="form-grid-2">
+        <div>
+          <label for="maxFotosCrear">Capacidad máxima de fotos</label>
+          <input id="maxFotosCrear" type="number" min="1" max="2000" value="300">
+        </div>
+        <div>
+          <label for="maxVideosCrear">Capacidad máxima de videos (hasta 1 min)</label>
+          <input id="maxVideosCrear" type="number" min="0" max="100" value="10">
+        </div>
+      </div>
+
+      <div style="margin-top:18px;display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+        <button type="button" id="crearAlbum" class="btn-primary">✨ Crear álbum y generar clave de anfitrión</button>
+        <span id="resultado" role="status" aria-live="polite" style="font-size:13.5px;font-weight:600"></span>
+      </div>
+
+      <!-- FICHA LISTA PARA COPIAR Y ENVIAR AL CLIENTE -->
+      <div id="fichaClienteNuevo" class="client-delivery-box">
+        <h4>🎉 ¡Álbum listo para entregar al cliente!</h4>
+        <pre id="textoFichaCliente"></pre>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <button type="button" id="btnCopiarFicha" class="btn-primary">📋 Copiar datos para enviar al cliente</button>
+          <button type="button" id="btnDescargarTarjetaNuevo" class="btn-sand">🖨️ Descargar tarjeta QR para mesa (PNG)</button>
+          <a id="linkAbrirNuevo" href="#" target="_blank" rel="noopener noreferrer" class="btn-secondary" style="text-decoration:none">↗ Abrir álbum</a>
+        </div>
+      </div>
+    </section>
+
+    <!-- 3. MIS ÁLBUMES -->
+    <section class="panel" id="panelListado">
+      <div class="panel-header">
+        <h2><span class="step-pill">3</span> Mis álbumes creados</h2>
+        <button type="button" id="verAlbumes" class="btn-secondary">🔄 Actualizar lista</button>
+      </div>
+      <p class="muted">Consultá todos tus eventos, descargá sus tarjetas QR listas para imprimir o renová la clave privada de los anfitriones.</p>
+
+      <div id="buscadorWrap" class="search-bar-wrap">
+        <input id="buscarAlbum" type="text" placeholder="🔍 Buscar álbum por nombre de cliente o fecha (ej.: Emma, Boda, 2026)...">
+      </div>
+
+      <p id="estadoListado" role="status" aria-live="polite" style="font-size:13.5px;font-weight:600;color:var(--sola-text-muted)"></p>
       <div id="listaAlbumes"></div>
-    </div>
+    </section>
   </main>
-  <!-- La biblioteca genera el QR en el navegador: el enlace privado no se envía a un servicio generador de QR. -->
+
+  <div id="toast" class="toast-msg" role="status" aria-live="polite"></div>
+
+  <!-- Generador QR en navegador -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js" referrerpolicy="no-referrer"></script>
-<script>
-  const resultado = document.getElementById("resultado");
-  const estadoListado = document.getElementById("estadoListado");
-  const estadoLogin = document.getElementById("estadoLogin");
-  const listaAlbumes = document.getElementById("listaAlbumes");
-  const botonListar = document.getElementById("verAlbumes");
-  const botonIngresar = document.getElementById("ingresarVer");
-  const inputClave = document.getElementById("adminKey");
-  const btnToggleClave = document.getElementById("toggleClave");
+  <script>
+    const resultado = document.getElementById("resultado");
+    const estadoListado = document.getElementById("estadoListado");
+    const estadoLogin = document.getElementById("estadoLogin");
+    const listaAlbumes = document.getElementById("listaAlbumes");
+    const botonListar = document.getElementById("verAlbumes");
+    const botonIngresar = document.getElementById("ingresarVer");
+    const inputClave = document.getElementById("adminKey");
+    const btnToggleClave = document.getElementById("toggleClave");
+    const btnCerrarSesion = document.getElementById("btnCerrarSesion");
+    const buscadorWrap = document.getElementById("buscadorWrap");
+    const inputBuscar = document.getElementById("buscarAlbum");
+    const fichaClienteNuevo = document.getElementById("fichaClienteNuevo");
+    const textoFichaCliente = document.getElementById("textoFichaCliente");
+    const toast = document.getElementById("toast");
 
-  document.getElementById("crearAlbum").addEventListener("click", crearAlbum);
-  botonListar.addEventListener("click", listarAlbumes);
-  botonIngresar.addEventListener("click", listarAlbumes);
+    let albumesCargados = [];
+    let ultimoAlbumCreado = null;
 
-  btnToggleClave.addEventListener("click", () => {
-    const esPass = inputClave.type === "password";
-    inputClave.type = esPass ? "text" : "password";
-    btnToggleClave.textContent = esPass ? "🙈 Ocultar" : "👁️ Ver clave";
-  });
-
-  inputClave.addEventListener("keydown", (e) => {
-    if (e.key === "Enter") {
-      e.preventDefault();
-      listarAlbumes();
+    function showToast(msj, tiempo = 3200) {
+      toast.textContent = msj;
+      toast.classList.add("show");
+      setTimeout(() => toast.classList.remove("show"), tiempo);
     }
-  });
 
-  async function crearAlbum() {
-    const adminKey = document.getElementById("adminKey").value.trim();
-    const nombre = document.getElementById("nombre").value.trim();
-    const fecha = document.getElementById("fecha").value;
-    if (!adminKey || !nombre || !fecha) {
-      resultado.textContent = "Completá la clave de administración, el nombre y la fecha.";
-      return;
+    // Fecha por defecto hoy
+    const hoyInput = document.getElementById("fecha");
+    if (hoyInput && !hoyInput.value) {
+      hoyInput.value = new Date().toLocaleDateString("en-CA");
     }
-    resultado.textContent = "Creando álbum...";
-    try {
-      const respuesta = await fetch("/admin/crear-album", {
-        method: "POST",
-        headers: { "Content-Type": "application/json", "X-Admin-Key": adminKey },
-        body: JSON.stringify({ nombre, fecha })
-      });
-      const datos = await respuesta.json();
-      if (!respuesta.ok) {
-        resultado.textContent = datos.error || "No se pudo crear el álbum.";
+
+    document.getElementById("crearAlbum").addEventListener("click", crearAlbum);
+    botonListar.addEventListener("click", listarAlbumes);
+    botonIngresar.addEventListener("click", listarAlbumes);
+
+    btnToggleClave.addEventListener("click", () => {
+      const esPass = inputClave.type === "password";
+      inputClave.type = esPass ? "text" : "password";
+      btnToggleClave.textContent = esPass ? "🙈 Ocultar" : "👁️ Ver clave";
+    });
+
+    btnCerrarSesion.addEventListener("click", () => {
+      sessionStorage.removeItem("sola_admin_key");
+      inputClave.value = "";
+      albumesCargados = [];
+      listaAlbumes.replaceChildren();
+      buscadorWrap.style.display = "none";
+      btnCerrarSesion.style.display = "none";
+      estadoLogin.textContent = "";
+      estadoListado.textContent = "Sesión cerrada.";
+      showToast("Sesión de administración cerrada");
+    });
+
+    inputClave.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") {
+        e.preventDefault();
+        listarAlbumes();
+      }
+    });
+
+    inputBuscar.addEventListener("input", () => {
+      renderizarListaAlbumes(albumesCargados);
+    });
+
+    function armarTextoEntregaCliente(nombre, fechaStr, enlace, clavePareja) {
+      return [
+        `✨ ÁLBUM COMPARTIDO · SOLA INVITACIONES ✨`,
+        `Evento: ${nombre}`,
+        `Fecha: ${fechaVisible(fechaStr)}`,
+        ``,
+        `🔗 Enlace del álbum (para compartir con invitados):`,
+        `${enlace}`,
+        ``,
+        `🔑 Clave privada de anfitriones (solo para ustedes):`,
+        `${clavePareja || "(Generar desde el botón 'Clave de anfitrión')"}`,
+        ``,
+        `💡 Con su clave privada pueden tocar "⚙ Administrar este álbum" al pie de la página para eliminar archivos si lo necesitan y descargar el álbum completo en un archivo .ZIP.`
+      ].join("\n");
+    }
+
+    async function crearAlbum() {
+      const adminKey = inputClave.value.trim();
+      const nombre = document.getElementById("nombre").value.trim();
+      const fecha = document.getElementById("fecha").value;
+      const maxFotos = Number(document.getElementById("maxFotosCrear").value) || 300;
+      const maxVideos = Number(document.getElementById("maxVideosCrear").value) ?? 10;
+
+      if (!adminKey || !nombre || !fecha) {
+        resultado.style.color = "#b94a48";
+        resultado.textContent = "Completá la clave de administración, el nombre y la fecha.";
         return;
       }
-      resultado.replaceChildren();
-      const texto = document.createTextNode("Álbum creado: ");
-      const link = document.createElement("a");
-      link.href = datos.enlace;
-      link.textContent = "Abrir álbum";
-      link.target = "_blank";
-      link.rel = "noopener noreferrer";
-      resultado.append(texto, link);
-    } catch (e) {
-      resultado.textContent = "No se pudo conectar con el servidor.";
-    }
-  }
+      resultado.style.color = "var(--sola-text-muted)";
+      resultado.textContent = "Creando álbum...";
+      fichaClienteNuevo.classList.remove("show");
 
-  function fechaVisible(fecha) {
-    if (!/^\d{4}-\d{2}-\d{2}$/.test(fecha || "")) return fecha || "Sin fecha";
-    const [a, m, d] = fecha.split("-");
-    return `${d}/${m}/${a}`;
-  }
+      try {
+        const respuesta = await fetch("/admin/crear-album", {
+          method: "POST",
+          headers: { "Content-Type": "application/json", "X-Admin-Key": adminKey },
+          body: JSON.stringify({ nombre, fecha, maxFotos, maxVideos })
+        });
+        const datos = await respuesta.json();
+        if (!respuesta.ok) {
+          resultado.style.color = "#b94a48";
+          resultado.textContent = datos.error || "No se pudo crear el álbum.";
+          return;
+        }
+        sessionStorage.setItem("sola_admin_key", adminKey);
+        resultado.style.color = "#2b5e2e";
+        resultado.textContent = "✅ ¡Álbum creado con éxito!";
+        showToast("¡Álbum y clave de anfitrión creados!");
 
-  function descargarQR(url, nombre) {
-    if (typeof QRCode === "undefined") {
-      throw new Error("No se pudo cargar el generador de QR. Comprobá tu conexión a Internet.");
+        ultimoAlbumCreado = datos;
+        const fichaTxt = armarTextoEntregaCliente(datos.nombre, datos.fecha, datos.enlace, datos.clavePareja);
+        textoFichaCliente.textContent = fichaTxt;
+        document.getElementById("linkAbrirNuevo").href = datos.enlace;
+        fichaClienteNuevo.classList.add("show");
+
+        document.getElementById("nombre").value = "";
+        await listarAlbumes();
+      } catch (e) {
+        resultado.style.color = "#b94a48";
+        resultado.textContent = "No se pudo conectar con el servidor.";
+      }
     }
-    const contenedor = document.createElement("div");
-    contenedor.style.cssText = "position:absolute;left:-9999px;top:0";
-    document.body.appendChild(contenedor);
-    try {
-      new QRCode(contenedor, {
-        text: url,
-        width: 1024,
-        height: 1024,
-        colorDark: "#000000",
-        colorLight: "#ffffff",
-        correctLevel: QRCode.CorrectLevel.M
-      });
-      const canvas = contenedor.querySelector("canvas");
-      if (!canvas) throw new Error("No se pudo generar la imagen QR.");
+
+    document.getElementById("btnCopiarFicha").addEventListener("click", async () => {
+      if (!textoFichaCliente.textContent) return;
+      try {
+        await navigator.clipboard.writeText(textoFichaCliente.textContent);
+        showToast("¡Ficha completa copiada al portapapeles! 📋");
+      } catch {
+        prompt("Copiá los datos para el cliente:", textoFichaCliente.textContent);
+      }
+    });
+
+    document.getElementById("btnDescargarTarjetaNuevo").addEventListener("click", () => {
+      if (!ultimoAlbumCreado) return;
+      descargarTarjetaQRImprimible(ultimoAlbumCreado.enlace, ultimoAlbumCreado.nombre, ultimoAlbumCreado.fecha);
+    });
+
+    function fechaVisible(fecha) {
+      if (!/^\d{4}-\d{2}-\d{2}$/.test(fecha || "")) return fecha || "Sin fecha";
+      const [a, m, d] = fecha.split("-");
+      return `${d}/${m}/${a}`;
+    }
+
+    function fechaLarga(fechaStr) {
+      if (!/^\d{4}-\d{2}-\d{2}$/.test(fechaStr || "")) return fechaStr || "";
+      const [a, m, d] = fechaStr.split("-").map(Number);
+      const meses = ["enero","febrero","marzo","abril","mayo","junio","julio","agosto","septiembre","octubre","noviembre","diciembre"];
+      return `${d} de ${meses[m - 1]} de ${a}`;
+    }
+
+    function obtenerCanvasQR(url, size = 1024) {
+      if (typeof QRCode === "undefined") {
+        throw new Error("No se pudo cargar el generador de QR. Comprobá tu conexión a Internet.");
+      }
+      const contenedor = document.createElement("div");
+      contenedor.style.cssText = "position:absolute;left:-9999px;top:0";
+      document.body.appendChild(contenedor);
+      try {
+        new QRCode(contenedor, {
+          text: url,
+          width: size,
+          height: size,
+          colorDark: "#252525",
+          colorLight: "#ffffff",
+          correctLevel: QRCode.CorrectLevel.M
+        });
+        const canvas = contenedor.querySelector("canvas");
+        if (!canvas) throw new Error("No se pudo generar la imagen QR.");
+        return canvas;
+      } finally {
+        contenedor.remove();
+      }
+    }
+
+    function nombreArchivoSeguro(nombre) {
+      return (nombre || "album")
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .replace(/[^a-zA-Z0-9_-]+/g, "-")
+        .replace(/^-+|-+$/g, "")
+        .slice(0, 70) || "album";
+    }
+
+    function descargarQR(url, nombre) {
+      const qrCanvas = obtenerCanvasQR(url, 1024);
       const descarga = document.createElement("a");
-      const nombreSeguro = (nombre || "album").normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-zA-Z0-9_-]+/g, "-").replace(/^-+|-+$/g, "").slice(0, 70) || "album";
-      descarga.download = `QR-${nombreSeguro}.png`;
+      descarga.download = `QR-${nombreArchivoSeguro(nombre)}.png`;
+      descarga.href = qrCanvas.toDataURL("image/png");
+      document.body.appendChild(descarga);
+      descarga.click();
+      descarga.remove();
+      showToast("Código QR descargado en PNG");
+    }
+
+    function descargarTarjetaQRImprimible(url, nombre, fechaStr) {
+      const qrCanvas = obtenerCanvasQR(url, 640);
+      const canvas = document.createElement("canvas");
+      canvas.width = 1200;
+      canvas.height = 1600;
+      const ctx = canvas.getContext("2d");
+
+      // Fondo crema Sola
+      ctx.fillStyle = "#FAF8F5";
+      ctx.fillRect(0, 0, 1200, 1600);
+
+      // Marco doble elegante
+      ctx.strokeStyle = "#DED7CC";
+      ctx.lineWidth = 3;
+      ctx.strokeRect(56, 56, 1088, 1488);
+      ctx.strokeStyle = "#EBE5DC";
+      ctx.lineWidth = 1.5;
+      ctx.strokeRect(72, 72, 1056, 1456);
+
+      ctx.textAlign = "center";
+      ctx.fillStyle = "#7A7670";
+      ctx.font = '600 26px "Plus Jakarta Sans", sans-serif';
+      ctx.fillText("Á L B U M   C O M P A R T I D O", 600, 190);
+
+      ctx.fillStyle = "#252525";
+      ctx.font = '700 62px "Plus Jakarta Sans", sans-serif';
+      ctx.fillText((nombre || "Evento").slice(0, 32), 600, 290);
+
+      const fechaTexto = fechaLarga(fechaStr);
+      if (fechaTexto) {
+        ctx.fillStyle = "#7A7670";
+        ctx.font = '400 32px "Plus Jakarta Sans", sans-serif';
+        ctx.fillText(fechaTexto, 600, 350);
+      }
+
+      // Divisor corazón
+      ctx.strokeStyle = "#D8D0C5";
+      ctx.lineWidth = 2;
+      ctx.beginPath(); ctx.moveTo(430, 405); ctx.lineTo(560, 405); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(640, 405); ctx.lineTo(770, 405); ctx.stroke();
+      ctx.fillStyle = "#9C8E7E";
+      ctx.font = "32px sans-serif";
+      ctx.fillText("♡", 600, 416);
+
+      // Tarjeta blanca central para el QR
+      ctx.save();
+      ctx.shadowColor = "rgba(40, 35, 25, 0.08)";
+      ctx.shadowBlur = 36;
+      ctx.shadowOffsetY = 12;
+      ctx.fillStyle = "#FFFFFF";
+      ctx.beginPath();
+      if (ctx.roundRect) ctx.roundRect(240, 470, 720, 720, 40);
+      else ctx.rect(240, 470, 720, 720);
+      ctx.fill();
+      ctx.restore();
+
+      ctx.drawImage(qrCanvas, 280, 510, 640, 640);
+
+      ctx.fillStyle = "#3B3E32";
+      ctx.font = '700 40px "Plus Jakarta Sans", sans-serif';
+      ctx.fillText("¡Escaneá el código QR!", 600, 1285);
+
+      ctx.fillStyle = "#7A7670";
+      ctx.font = '400 30px "Plus Jakarta Sans", sans-serif';
+      ctx.fillText("Compartí tus fotos, videos y mensajes del evento", 600, 1340);
+
+      try {
+        const logoImg = document.querySelector(".admin-header img");
+        if (logoImg && logoImg.complete && logoImg.naturalWidth > 0) {
+          const h = 54;
+          const w = (logoImg.naturalWidth / logoImg.naturalHeight) * h;
+          ctx.globalAlpha = 0.78;
+          ctx.drawImage(logoImg, 600 - w / 2, 1435, w, h);
+          ctx.globalAlpha = 1;
+        }
+      } catch (e) {}
+
+      const descarga = document.createElement("a");
+      descarga.download = `Tarjeta-QR-${nombreArchivoSeguro(nombre)}.png`;
       descarga.href = canvas.toDataURL("image/png");
       document.body.appendChild(descarga);
       descarga.click();
       descarga.remove();
-    } finally {
-      contenedor.remove();
+      showToast("Tarjeta QR lista para imprimir descargada");
     }
-  }
 
-  async function listarAlbumes() {
-    const adminKey = document.getElementById("adminKey").value.trim();
-    if (!adminKey) {
-      estadoListado.textContent = "Ingresá primero tu clave de administración en el campo de arriba.";
-      estadoLogin.style.color = "#b94a48";
-      estadoLogin.textContent = "Escribí tu clave de administración primero.";
-      return;
-    }
-    botonListar.disabled = true;
-    botonIngresar.disabled = true;
-    listaAlbumes.replaceChildren();
-    estadoListado.textContent = "Consultando álbumes...";
-    estadoLogin.style.color = "#4B4B4D";
-    estadoLogin.textContent = "Verificando clave y cargando álbumes...";
-    try {
-      const respuesta = await fetch("/admin/listar-albumes", {
-        method: "GET",
-        headers: { "X-Admin-Key": adminKey },
-        cache: "no-store"
-      });
-      const datos = await respuesta.json();
-      if (!respuesta.ok) {
-        const msgError = datos.error || "No se pudieron consultar los álbumes.";
-        estadoListado.textContent = msgError;
-        estadoLogin.style.color = "#b94a48";
-        estadoLogin.textContent = "❌ " + msgError + " (verificá la clave con el botón 'Ver clave').";
-        return;
-      }
-      if (!Array.isArray(datos.albumes)) {
-        estadoListado.textContent = "La respuesta no contiene un listado válido.";
-        return;
-      }
-      estadoListado.textContent = `${datos.albumes.length} álbum(es) encontrado(s).`;
-      estadoLogin.style.color = "#2e6b34";
-      estadoLogin.textContent = `✅ Clave correcta — ${datos.albumes.length} álbum(es) cargado(s) abajo.`;
-      for (const album of datos.albumes) {
+    function renderizarListaAlbumes(lista) {
+      const adminKey = inputClave.value.trim();
+      const filtro = (inputBuscar.value || "").trim().toLowerCase();
+      const filtrados = filtro
+        ? lista.filter(a =>
+            (a.nombre || "").toLowerCase().includes(filtro) ||
+            (a.fecha || "").toLowerCase().includes(filtro) ||
+            fechaVisible(a.fecha).toLowerCase().includes(filtro)
+          )
+        : lista;
+
+      listaAlbumes.replaceChildren();
+      estadoListado.textContent = filtro
+        ? `Mostrando ${filtrados.length} de ${lista.length} álbum(es).`
+        : `${lista.length} álbum(es) activo(s) en total.`;
+
+      const ahora = Date.now();
+
+      for (const album of filtrados) {
         const item = document.createElement("div");
-        item.className = "album";
+        item.className = "album-card";
+
+        const top = document.createElement("div");
+        top.className = "album-top";
+
         const titulo = document.createElement("h3");
         titulo.textContent = album.nombre || "Álbum sin nombre";
-        const fecha = document.createElement("p");
-        fecha.textContent = `Fecha del evento: ${fechaVisible(album.fecha)}`;
-        item.append(titulo, fecha);
+
+        const badges = document.createElement("div");
+        badges.className = "badges-row";
+
+        const cierreMs = album.cierreCarga ? Date.parse(album.cierreCarga) : null;
+        const finMs = album.finAlbum ? Date.parse(album.finAlbum) : null;
+
+        const badgeEstado = document.createElement("span");
+        if (finMs && ahora >= finMs) {
+          badgeEstado.className = "status-badge warn";
+          badgeEstado.textContent = "⚪ Vencido";
+        } else if (cierreMs && ahora >= cierreMs) {
+          badgeEstado.className = "status-badge warn";
+          badgeEstado.textContent = "🟠 Recepción cerrada";
+        } else {
+          badgeEstado.className = "status-badge ok";
+          badgeEstado.textContent = "🟢 Recepción activa";
+        }
+        badges.appendChild(badgeEstado);
+
+        const badgeClave = document.createElement("span");
+        badgeClave.className = "status-badge " + (album.tieneClavePareja ? "ok" : "warn");
+        badgeClave.textContent = album.tieneClavePareja ? "🔑 Clave anfitrión activa" : "⚠️ Sin clave de anfitrión";
+        badges.appendChild(badgeClave);
+
+        top.append(titulo, badges);
+
+        const meta = document.createElement("div");
+        meta.className = "album-meta";
+        const finFechaStr = album.finAlbum ? fechaVisible(album.finAlbum.slice(0, 10)) : "31 días post-evento";
+        meta.innerHTML = `
+          <span>📅 <strong>Evento:</strong> ${fechaVisible(album.fecha)}</span>
+          <span>📸 <strong>Capacidad:</strong> ${album.maxFotos ?? 300} fotos · ${album.maxVideos ?? 10} videos</span>
+          <span>⏳ <strong>Disponible hasta:</strong> ${finFechaStr}</span>
+        `;
+
+        item.append(top, meta);
+
         if (album.enlace) {
           const acciones = document.createElement("div");
           acciones.className = "acciones";
+
           const enlace = document.createElement("a");
           enlace.href = album.enlace;
           enlace.target = "_blank";
           enlace.rel = "noopener noreferrer";
-          enlace.textContent = "Abrir álbum";
+          enlace.className = "btn-link-open";
+          enlace.textContent = "↗ Abrir álbum";
+
           const copiar = document.createElement("button");
           copiar.type = "button";
-          copiar.textContent = "Copiar enlace";
+          copiar.className = "btn-secondary";
+          copiar.textContent = "🔗 Copiar enlace";
           copiar.addEventListener("click", async () => {
             try {
               await navigator.clipboard.writeText(album.enlace);
-              copiar.textContent = "¡Copiado!";
-            } catch (e) {
-              copiar.textContent = "No se pudo copiar";
+              showToast("Enlace copiado al portapapeles 📋");
+            } catch {
+              prompt("Copiá el enlace:", album.enlace);
             }
           });
+
+          const tarjetaQr = document.createElement("button");
+          tarjetaQr.type = "button";
+          tarjetaQr.className = "btn-sand";
+          tarjetaQr.textContent = "🖨️ Tarjeta QR mesa (PNG)";
+          tarjetaQr.addEventListener("click", () => {
+            try {
+              descargarTarjetaQRImprimible(album.enlace, album.nombre, album.fecha);
+            } catch (e) {
+              alert(e.message);
+            }
+          });
+
           const qr = document.createElement("button");
           qr.type = "button";
-          qr.textContent = "Descargar QR";
+          qr.className = "btn-secondary";
+          qr.textContent = "📱 Solo QR (PNG)";
           qr.addEventListener("click", () => {
             try {
               descargarQR(album.enlace, album.nombre);
-              qr.textContent = "QR descargado";
             } catch (e) {
-              qr.textContent = "Error al generar QR";
-              estadoListado.textContent = e.message;
+              alert(e.message);
             }
           });
-          const limites = document.createElement('button');
-          limites.type='button';limites.textContent=`Capacidad: ${album.maxFotos??300} fotos / ${album.maxVideos??10} videos`;
-          limites.onclick=async()=>{
-            const f=prompt('Máximo de fotos (1 a 2000)',String(album.maxFotos??300));if(f===null)return;
-            const v=prompt('Máximo de videos (0 a 100)',String(album.maxVideos??10));if(v===null)return;
-            const maxFotos=Number(f),maxVideos=Number(v);
-            if(!Number.isInteger(maxFotos)||maxFotos<1||maxFotos>2000||!Number.isInteger(maxVideos)||maxVideos<0||maxVideos>100){alert('Valores inválidos');return;}
-            try{const r=await fetch('/admin/actualizar-limites',{method:'POST',headers:{'Content-Type':'application/json','X-Admin-Key':adminKey},body:JSON.stringify({id:album.id,maxFotos,maxVideos})});const d=await r.json();if(!r.ok)throw Error(d.error||'No se pudo guardar');album.maxFotos=maxFotos;album.maxVideos=maxVideos;limites.textContent=`Capacidad: ${maxFotos} fotos / ${maxVideos} videos`;alert('Capacidad actualizada');}catch(e){alert(e.message)}
+
+          const pareja = document.createElement("button");
+          pareja.type = "button";
+          pareja.className = "btn-secondary";
+          pareja.textContent = album.tieneClavePareja ? "🔑 Renovar clave anfitrión" : "🔑 Crear clave anfitrión";
+          pareja.onclick = async () => {
+            if (!confirm(album.tieneClavePareja
+              ? "¿Generar una nueva clave privada para los anfitriones? La clave anterior dejará de funcionar."
+              : "¿Generar la clave privada para los anfitriones de este álbum?")) return;
+            try {
+              const r = await fetch("/admin/clave-pareja", {
+                method: "POST",
+                headers: { "Content-Type": "application/json", "X-Admin-Key": adminKey },
+                body: JSON.stringify({ id: album.id })
+              });
+              const d = await r.json();
+              if (!r.ok) throw Error(d.error || "No se pudo crear la clave");
+              album.tieneClavePareja = true;
+              badgeClave.className = "status-badge ok";
+              badgeClave.textContent = "🔑 Clave anfitrión activa";
+              const ficha = armarTextoEntregaCliente(album.nombre, album.fecha, album.enlace, d.clavePareja);
+              try {
+                await navigator.clipboard.writeText(ficha);
+                alert("✅ ¡Nueva clave privada creada y ficha completa copiada al portapapeles!\n\nYa podés pegarla en el WhatsApp o correo de tu cliente:\n\n" + ficha);
+              } catch {
+                prompt("Copiá y guardá esta clave privada para tu cliente:", ficha);
+              }
+            } catch (e) {
+              alert(e.message);
+            }
           };
-          const pareja=document.createElement('button');
-          pareja.type='button';pareja.textContent='Crear / renovar clave del organizador';
-          pareja.onclick=async()=>{
-            if(!confirm('¿Crear una clave privada nueva para este álbum? Si ya existe una, dejará de funcionar.'))return;
-            try{
-              const r=await fetch('/admin/clave-pareja',{method:'POST',headers:{'Content-Type':'application/json','X-Admin-Key':adminKey},body:JSON.stringify({id:album.id})});
-              const d=await r.json();if(!r.ok)throw Error(d.error||'No se pudo crear la clave');
-              // Mostrar una sola vez para copiarla y entregarla en privado a el organizador.
-              const texto='Clave privada para administrar el álbum '+album.nombre+': '+d.clavePareja;
-              try{await navigator.clipboard.writeText(texto);alert('Clave privada copiada al portapapeles. Guardala y compartila únicamente con el organizador.')}catch{prompt('Copiá y guardá esta clave privada; no se volverá a mostrar:',texto)}
-            }catch(e){alert(e.message)}
+
+          const limites = document.createElement("button");
+          limites.type = "button";
+          limites.className = "btn-secondary";
+          limites.textContent = "📊 Cambiar capacidad";
+          limites.onclick = async () => {
+            const f = prompt("Máximo de fotos permitidas (1 a 2000):", String(album.maxFotos ?? 300));
+            if (f === null) return;
+            const v = prompt("Máximo de videos permitidos (0 a 100):", String(album.maxVideos ?? 10));
+            if (v === null) return;
+            const maxFotos = Number(f), maxVideos = Number(v);
+            if (!Number.isInteger(maxFotos) || maxFotos < 1 || maxFotos > 2000 || !Number.isInteger(maxVideos) || maxVideos < 0 || maxVideos > 100) {
+              alert("Valores inválidos");
+              return;
+            }
+            try {
+              const r = await fetch("/admin/actualizar-limites", {
+                method: "POST",
+                headers: { "Content-Type": "application/json", "X-Admin-Key": adminKey },
+                body: JSON.stringify({ id: album.id, maxFotos, maxVideos })
+              });
+              const d = await r.json();
+              if (!r.ok) throw Error(d.error || "No se pudo guardar");
+              album.maxFotos = maxFotos;
+              album.maxVideos = maxVideos;
+              renderizarListaAlbumes(albumesCargados);
+              showToast("Capacidad del álbum actualizada");
+            } catch (e) {
+              alert(e.message);
+            }
           };
-          const editar = document.createElement('button');
-          editar.type = 'button';
-          editar.textContent = 'Editar nombre y fecha';
-          editar.addEventListener('click', async () => {
-            const nuevoNombre = prompt('Nombre del evento', album.nombre);
+
+          const editar = document.createElement("button");
+          editar.type = "button";
+          editar.className = "btn-secondary";
+          editar.textContent = "✏️ Editar nombre/fecha";
+          editar.addEventListener("click", async () => {
+            const nuevoNombre = prompt("Nombre del evento:", album.nombre);
             if (nuevoNombre === null) return;
-            const nuevaFecha = prompt('Fecha del evento (AAAA-MM-DD)', album.fecha);
+            const nuevaFecha = prompt("Fecha del evento (AAAA-MM-DD):", album.fecha);
             if (nuevaFecha === null) return;
             if (nuevoNombre.trim().length < 3 || nuevoNombre.trim().length > 120 || !/^\d{4}-\d{2}-\d{2}$/.test(nuevaFecha)) {
-              alert('Ingresá un nombre válido y una fecha con formato AAAA-MM-DD.'); return;
+              alert("Ingresá un nombre válido y una fecha con formato AAAA-MM-DD.");
+              return;
             }
             try {
-              const r = await fetch('/admin/editar-album', {
-                method: 'POST',
-                headers: {'Content-Type':'application/json','X-Admin-Key':adminKey},
-                body: JSON.stringify({id:album.id,nombre:nuevoNombre.trim(),fecha:nuevaFecha})
+              const r = await fetch("/admin/editar-album", {
+                method: "POST",
+                headers: { "Content-Type": "application/json", "X-Admin-Key": adminKey },
+                body: JSON.stringify({ id: album.id, nombre: nuevoNombre.trim(), fecha: nuevaFecha })
               });
               const d = await r.json();
-              if (!r.ok) throw new Error(d.error || 'No se pudo editar');
+              if (!r.ok) throw new Error(d.error || "No se pudo editar");
+              showToast("Datos del evento actualizados");
               await listarAlbumes();
-            } catch (e) { alert(e.message); }
+            } catch (e) {
+              alert(e.message);
+            }
           });
-          const eliminar = document.createElement('button');
-          eliminar.type = 'button';
-          eliminar.textContent = 'Eliminar álbum';
-          eliminar.addEventListener('click', async () => {
+
+          const eliminar = document.createElement("button");
+          eliminar.type = "button";
+          eliminar.className = "btn-danger-outline";
+          eliminar.textContent = "🗑️ Eliminar";
+          eliminar.addEventListener("click", async () => {
             if (!confirm(`¿Eliminar definitivamente el álbum "${album.nombre}" y todos sus archivos y mensajes? Esta acción no se puede deshacer.`)) return;
-            if (prompt('Escribí ELIMINAR para confirmar') !== 'ELIMINAR') return;
+            if (prompt("Escribí ELIMINAR en mayúsculas para confirmar:") !== "ELIMINAR") return;
             try {
-              const r = await fetch('/admin/eliminar-album', {
-                method:'POST',
-                headers:{'Content-Type':'application/json','X-Admin-Key':adminKey},
-                body:JSON.stringify({id:album.id,confirmacion:'ELIMINAR'})
+              const r = await fetch("/admin/eliminar-album", {
+                method: "POST",
+                headers: { "Content-Type": "application/json", "X-Admin-Key": adminKey },
+                body: JSON.stringify({ id: album.id, confirmacion: "ELIMINAR" })
               });
               const d = await r.json();
-              if (!r.ok) throw new Error(d.error || 'No se pudo eliminar');
+              if (!r.ok) throw new Error(d.error || "No se pudo eliminar");
+              showToast("Álbum eliminado definitivamente");
               await listarAlbumes();
-            } catch (e) { alert(e.message); }
+            } catch (e) {
+              alert(e.message);
+            }
           });
-          acciones.append(enlace, copiar, qr, limites, pareja, editar, eliminar);
+
+          acciones.append(enlace, copiar, tarjetaQr, qr, pareja, limites, editar, eliminar);
           item.append(acciones);
         }
         listaAlbumes.append(item);
       }
-    } catch (e) {
-      estadoListado.textContent = "No se pudo conectar con el servidor.";
-      estadoLogin.style.color = "#b94a48";
-      estadoLogin.textContent = "No se pudo conectar con el servidor.";
-    } finally {
-      botonListar.disabled = false;
-      botonIngresar.disabled = false;
     }
-  }
-</script>
+
+    async function listarAlbumes() {
+      const adminKey = inputClave.value.trim();
+      if (!adminKey) {
+        estadoListado.textContent = "Ingresá primero tu clave de administración arriba.";
+        estadoLogin.style.color = "#b94a48";
+        estadoLogin.textContent = "⚠️ Escribí tu clave de administración primero.";
+        return;
+      }
+      botonListar.disabled = true;
+      botonIngresar.disabled = true;
+      estadoListado.textContent = "Consultando álbumes...";
+      estadoLogin.style.color = "var(--sola-text-muted)";
+      estadoLogin.textContent = "Verificando clave y cargando álbumes...";
+
+      try {
+        const respuesta = await fetch("/admin/listar-albumes", {
+          method: "GET",
+          headers: { "X-Admin-Key": adminKey },
+          cache: "no-store"
+        });
+        const datos = await respuesta.json();
+        if (!respuesta.ok) {
+          const msgError = datos.error || "No se pudieron consultar los álbumes.";
+          estadoListado.textContent = msgError;
+          estadoLogin.style.color = "#b94a48";
+          estadoLogin.textContent = "❌ " + msgError + " (podés verificarla con el botón 'Ver clave').";
+          return;
+        }
+        if (!Array.isArray(datos.albumes)) {
+          estadoListado.textContent = "La respuesta no contiene un listado válido.";
+          return;
+        }
+
+        sessionStorage.setItem("sola_admin_key", adminKey);
+        btnCerrarSesion.style.display = "inline-flex";
+        estadoLogin.style.color = "#2b5e2e";
+        estadoLogin.textContent = `✅ Acceso verificado — ${datos.albumes.length} álbum(es) cargado(s).`;
+
+        albumesCargados = datos.albumes;
+        buscadorWrap.style.display = albumesCargados.length > 1 ? "block" : "none";
+        renderizarListaAlbumes(albumesCargados);
+      } catch (e) {
+        estadoListado.textContent = "No se pudo conectar con el servidor.";
+        estadoLogin.style.color = "#b94a48";
+        estadoLogin.textContent = "No se pudo conectar con el servidor.";
+      } finally {
+        botonListar.disabled = false;
+        botonIngresar.disabled = false;
+      }
+    }
+
+    // Restaurar clave de la sesión actual si ya había ingresado
+    const claveGuardada = sessionStorage.getItem("sola_admin_key");
+    if (claveGuardada) {
+      inputClave.value = claveGuardada;
+      listarAlbumes();
+    }
+  </script>
 </body>
 </html>

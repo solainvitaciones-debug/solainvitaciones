@@ -43,9 +43,11 @@ export async function onRequestGet({ request, env }) {
           id: album.id,
           nombre: album.nombre,
           fecha: album.fecha,
+          cierreCarga: album.cierreCarga,
           finAlbum: album.finAlbum,
           maxFotos: album.maxFotos ?? 300,
           maxVideos: album.maxVideos ?? 10,
+          tieneClavePareja: Boolean(album.claveParejaHash),
           enlace
         });
       }
