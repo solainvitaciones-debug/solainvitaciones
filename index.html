@@ -632,6 +632,7 @@ body{
   padding:16px;
   padding-right:calc(var(--sola-qr-width) + var(--sola-qr-gap) + 16px);
 }
+.lightbox.sola-projecting #descargarFoto{display:none!important}
 .sola-projection-side{display:none}
 .lightbox.sola-projecting .sola-projection-side{
   display:block;
@@ -823,7 +824,6 @@ body{
       Para subir tus fotos, abrí el enlace completo o código QR de tu evento.<br>
       <div style="margin-top:10px;display:flex;gap:8px;justify-content:center;flex-wrap:wrap">
         <a href="/?evento=sofia-15&clave=15ABC15abc15ABC15abc15ABC" style="padding:6px 12px;background:var(--sola-primary-olive);color:#fff;text-decoration:none;border-radius:999px;font-size:12px;font-weight:600">Ver demo (Sofía · 15)</a>
-        <a href="/admin" style="padding:6px 12px;border:1px solid var(--sola-border-light);color:var(--sola-text-main);text-decoration:none;border-radius:999px;font-size:12px">⚙ Administración</a>
       </div>
     </div>
 
@@ -834,7 +834,6 @@ body{
       </div>
       <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap">
         <button type="button" id="pareja" class="btn-admin-link">⚙ Administrar este álbum</button>
-        <a href="/admin/" class="btn-admin-link" style="text-decoration:none">🔐 Panel Administrador</a>
       </div>
     </footer>
 
