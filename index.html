@@ -1,344 +1,1298 @@
-<!doctype html>
+﻿<!doctype html>
 <html lang="es">
 <head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
 <title>Sola Invitaciones · Álbum compartido</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
-:root{--cream:#F4F1EB;--ink:#4B4B4D;--sand:#C9B8A5}*{box-sizing:border-box}body{margin:0;background:var(--cream);color:var(--ink);font-family:Arial,sans-serif}header{padding:22px;text-align:center;letter-spacing:4px;font-size:13px;border-bottom:1px solid #d9d5cd}.wrap{max-width:950px;margin:auto;padding:40px 22px}h1{font-family:Georgia,serif;font-weight:400;font-size:clamp(40px,7vw,76px);margin:8px 0 10px;text-align:center}.eyebrow{text-align:center;letter-spacing:3px;font-size:11px;text-transform:uppercase}.intro{text-align:center;line-height:1.7;margin-bottom:28px}.actions{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-bottom:28px}button{border:1px solid var(--ink);padding:13px 21px;background:transparent;color:var(--ink);font-size:13px;cursor:pointer;border-radius:2px}.primary{background:var(--sand);border-color:var(--sand);font-weight:bold}button:disabled{opacity:.55;cursor:not-allowed}.grid{columns:3 200px;column-gap:12px}.photo{break-inside:avoid;margin-bottom:12px}.photo img{width:100%;display:block;object-fit:cover;border-radius:3px;cursor:pointer}.empty{padding:60px 20px;border:1px dashed #bcb7ae;text-align:center;line-height:1.7}.muted{font-size:12px;color:#76726c;text-align:center;margin:30px}input{display:none}.top{display:flex;justify-content:space-between;align-items:center;gap:15px;flex-wrap:wrap;margin-bottom:20px}.count{font-size:13px}.lightbox{position:fixed;inset:0;background:#151515ed;display:none;align-items:center;justify-content:center;z-index:3;padding:30px}.lightbox img{max-width:100%;max-height:85vh;object-fit:contain}.close{position:absolute;right:20px;top:20px;color:white;font-size:28px;background:transparent;border:0}.note{background:#fff9;padding:18px;margin-top:25px;font-size:12px;line-height:1.6}.download-photo{position:absolute;left:20px;bottom:20px;color:#fff;border:1px solid #fff;background:#222b;text-decoration:none;padding:12px 16px;font-size:13px;border-radius:3px}.status{text-align:center;font-size:13px;min-height:18px;margin:-12px 0 18px}
-</style>
+:root{
+  --sola-bg-canvas:#FAF8F5;
+  --sola-bg-surface:#FFFFFF;
+  --sola-bg-pill:#EFECE6;
+  --sola-bg-subtle:#F4F1EA;
+  --sola-text-main:#252525;
+  --sola-text-muted:#7A7670;
+  --sola-text-light:#A4A099;
+  --sola-primary-olive:#3B3E32;
+  --sola-primary-hover:#2B2E24;
+  --sola-primary-text:#FFFFFF;
+  --sola-accent-sand:#C9B8A5;
+  --sola-border-light:#E7E3DC;
+  --sola-shadow-card:0 12px 36px rgba(40,35,25,0.06);
+  --sola-shadow-btn:0 8px 24px rgba(59,62,50,0.22);
+  --sola-shadow-circle:0 3px 12px rgba(0,0,0,0.05);
+  --sola-shadow-tab:0 2px 8px rgba(0,0,0,0.06);
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{
+  margin:0;
+  padding:0;
+  background:var(--sola-bg-canvas);
+  color:var(--sola-text-main);
+  font-family:'Plus Jakarta Sans',-apple-system,BlinkMacSystemFont,sans-serif;
+  min-height:100vh;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+}
+.app-container{
+  width:100%;
+  max-width:480px;
+  min-height:100vh;
+  background:var(--sola-bg-surface);
+  position:relative;
+  display:flex;
+  flex-direction:column;
+  box-shadow:var(--sola-shadow-card);
+  padding-bottom:30px;
+}
+@media(min-width:481px){
+  body{padding:24px 0}
+  .app-container{border-radius:36px;overflow:hidden;min-height:calc(100vh - 48px)}
+}
 
-<style>
-/* Navegación persistente: reutiliza funciones existentes */
-.actions > #upload, .actions > #project, .actions > #pareja {display:none!important}
-.actions:has(#descargarAlbum[style*="display: none"]) {margin-bottom:12px}
-body{padding-top:60px}
-.sola-nav{position:fixed;top:0;left:0;right:0;z-index:10;background:#f4f1ebf5;border-bottom:1px solid #d9d5cd;backdrop-filter:blur(8px);padding:9px 16px;display:flex;justify-content:center;gap:9px}
-.sola-nav button{padding:10px 15px;border:1px solid #c9b8a5;border-radius:7px;background:#f4f1eb;min-height:42px}
-.sola-nav button:first-child{background:#c9b8a5}
-.sola-more{position:relative}
-.sola-more-menu{display:none;position:absolute;bottom:calc(100% + 10px);right:0;background:#f4f1eb;border:1px solid #c9b8a5;box-shadow:0 6px 22px #0002;border-radius:8px;min-width:180px;padding:6px}
-.sola-more-menu.open{display:grid;gap:4px}
-.sola-more-menu button{width:100%;text-align:left}
-.sola-modal{display:none;position:fixed;inset:0;z-index:30;background:#1515159c;padding:24px;align-items:center;justify-content:center}
+/* HERO: Vintage Camera Illustration */
+.camera-hero{
+  width:100%;
+  background:linear-gradient(180deg, #ECE5D8 0%, #D8CEBF 100%);
+  position:relative;
+  padding-top:16px;
+  overflow:hidden;
+}
+.camera-svg{
+  display:block;
+  width:100%;
+  height:auto;
+  filter:drop-shadow(0 4px 12px rgba(0,0,0,0.08));
+}
+
+/* CONTENT CARD OVERLAP */
+.content-card{
+  position:relative;
+  z-index:2;
+  margin-top:-32px;
+  background:var(--sola-bg-surface);
+  border-radius:32px 32px 0 0;
+  padding:26px 20px 20px;
+  text-align:center;
+  flex:1;
+  display:flex;
+  flex-direction:column;
+}
+
+.event-title{
+  font-size:clamp(26px, 7vw, 34px);
+  font-weight:700;
+  color:var(--sola-text-main);
+  margin:0 0 6px;
+  letter-spacing:-0.02em;
+  line-height:1.2;
+}
+.event-date{
+  font-size:15px;
+  color:var(--sola-text-muted);
+  margin:0 0 10px;
+  font-weight:400;
+}
+.heart-divider{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:14px;
+  margin:10px 0 8px;
+}
+.heart-divider .line{
+  width:44px;
+  height:1px;
+  background:var(--sola-border-light);
+}
+.heart-divider .heart{
+  color:var(--sola-text-muted);
+  font-size:14px;
+  line-height:1;
+  transition:transform .3s cubic-bezier(0.175,0.885,0.32,1.275);
+}
+.heart-divider:hover .heart{
+  transform:scale(1.3);
+  color:#d9777f;
+}
+.album-badge{
+  font-size:12px;
+  text-transform:uppercase;
+  letter-spacing:0.08em;
+  color:var(--sola-text-muted);
+  font-weight:500;
+  margin:0 0 20px;
+}
+
+/* PILL TABS */
+.pill-tabs-wrap{
+  display:flex;
+  justify-content:center;
+  margin-bottom:22px;
+}
+.pill-tabs{
+  display:inline-flex;
+  background:var(--sola-bg-pill);
+  padding:5px;
+  border-radius:999px;
+  gap:3px;
+}
+.pill-tab{
+  display:flex;
+  align-items:center;
+  gap:7px;
+  padding:9px 17px;
+  border-radius:999px;
+  border:none;
+  background:transparent;
+  color:var(--sola-text-muted);
+  font-family:inherit;
+  font-size:13px;
+  font-weight:500;
+  cursor:pointer;
+  transition:all .25s cubic-bezier(0.16,1,0.3,1);
+}
+.pill-tab svg{
+  width:16px;
+  height:16px;
+  transition:transform .2s ease;
+}
+.pill-tab.active{
+  background:var(--sola-bg-surface);
+  color:var(--sola-text-main);
+  font-weight:600;
+  box-shadow:var(--sola-shadow-tab);
+}
+.pill-tab.active svg{
+  transform:scale(1.1);
+}
+
+/* GALLERIES & CONTENT SECTIONS */
+.tab-content{
+  display:none;
+  width:100%;
+  animation:solaFadeIn .3s ease forwards;
+}
+.tab-content.active{
+  display:block;
+}
+@keyframes solaFadeIn{
+  from{opacity:0;transform:translateY(8px)}
+  to{opacity:1;transform:translateY(0)}
+}
+
+/* PHOTO GALLERY */
+.gallery-grid{
+  columns:2 160px;
+  column-gap:12px;
+  margin-bottom:24px;
+}
+.photo{
+  break-inside:avoid;
+  margin-bottom:12px;
+  border-radius:18px;
+  overflow:hidden;
+  background:var(--sola-bg-pill);
+  box-shadow:0 3px 12px rgba(0,0,0,0.04);
+  position:relative;
+  transition:transform .25s cubic-bezier(0.16,1,0.3,1);
+}
+.photo:hover{
+  transform:translateY(-2px);
+}
+.photo img{
+  width:100%;
+  display:block;
+  object-fit:cover;
+  border-radius:18px;
+  cursor:pointer;
+  transition:filter .2s ease;
+}
+.photo img:hover{
+  filter:brightness(0.97);
+}
+.photo button.del-btn{
+  position:absolute;
+  bottom:8px;
+  right:8px;
+  background:rgba(21,21,21,0.75);
+  color:#fff;
+  border:none;
+  font-size:11px;
+  padding:5px 9px;
+  border-radius:8px;
+  cursor:pointer;
+  backdrop-filter:blur(4px);
+}
+
+/* VIDEO GALLERY */
+.video-card{
+  margin-bottom:16px;
+  border-radius:18px;
+  overflow:hidden;
+  background:#111;
+  box-shadow:0 4px 14px rgba(0,0,0,0.06);
+  position:relative;
+}
+.video-card video{
+  width:100%;
+  display:block;
+  border-radius:18px;
+  max-height:360px;
+}
+.video-card button.del-btn{
+  margin:10px auto;
+  display:block;
+  background:#d9534f;
+  color:#fff;
+  border:none;
+  padding:6px 14px;
+  border-radius:8px;
+  font-size:12px;
+  cursor:pointer;
+}
+
+/* EMPTY STATES */
+.empty-box{
+  padding:44px 20px;
+  background:var(--sola-bg-subtle);
+  border-radius:22px;
+  border:1px dashed var(--sola-border-light);
+  margin-bottom:24px;
+  color:var(--sola-text-muted);
+  font-size:14px;
+  line-height:1.6;
+}
+.empty-box svg{
+  color:var(--sola-text-light);
+  margin-bottom:10px;
+}
+
+/* PRIMARY UPLOAD BUTTON */
+.primary-upload-wrap{
+  margin-bottom:22px;
+  padding:0 4px;
+}
+.btn-primary-upload{
+  width:100%;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:12px;
+  background:var(--sola-primary-olive);
+  color:var(--sola-primary-text);
+  border:none;
+  padding:16px 24px;
+  border-radius:999px;
+  font-family:inherit;
+  font-size:16px;
+  font-weight:600;
+  cursor:pointer;
+  box-shadow:var(--sola-shadow-btn);
+  transition:all .22s cubic-bezier(0.16,1,0.3,1);
+}
+.btn-primary-upload:hover{
+  background:var(--sola-primary-hover);
+  transform:translateY(-2px);
+  box-shadow:0 12px 28px rgba(59,62,50,0.28);
+}
+.btn-primary-upload:active{
+  transform:translateY(1px);
+}
+.btn-primary-upload:disabled{
+  opacity:0.6;
+  cursor:not-allowed;
+  transform:none!important;
+}
+
+/* BOTTOM ACTION BAR (4 CIRCLES) */
+.bottom-action-bar{
+  display:flex;
+  justify-content:space-around;
+  align-items:flex-start;
+  gap:10px;
+  margin-top:auto;
+  padding:14px 6px 6px;
+  border-top:1px solid var(--sola-border-light);
+}
+.action-circle-btn{
+  background:transparent;
+  border:none;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:8px;
+  cursor:pointer;
+  flex:1;
+  padding:0;
+}
+.action-circle-btn .circle-icon{
+  width:52px;
+  height:52px;
+  border-radius:50%;
+  background:var(--sola-bg-surface);
+  border:1px solid var(--sola-border-light);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  color:var(--sola-text-main);
+  box-shadow:var(--sola-shadow-circle);
+  transition:all .25s cubic-bezier(0.16,1,0.3,1);
+}
+.action-circle-btn:hover .circle-icon{
+  transform:translateY(-3px) scale(1.06);
+  border-color:var(--sola-primary-olive);
+  color:var(--sola-primary-olive);
+}
+.action-circle-btn:active .circle-icon{
+  transform:scale(0.95);
+}
+.action-circle-btn span{
+  font-size:11px;
+  font-weight:500;
+  color:var(--sola-text-muted);
+  text-align:center;
+  line-height:1.2;
+}
+
+/* GUESTBOOK / MENSAJES */
+.message-form-card{
+  background:var(--sola-bg-subtle);
+  border-radius:20px;
+  padding:20px;
+  margin-bottom:24px;
+  text-align:left;
+}
+.message-form-card h3{
+  margin:0 0 6px;
+  font-size:16px;
+  font-weight:600;
+}
+.message-form-card p{
+  margin:0 0 14px;
+  font-size:13px;
+  color:var(--sola-text-muted);
+}
+.message-form-card input,
+.message-form-card textarea{
+  width:100%;
+  padding:12px 14px;
+  border-radius:12px;
+  border:1px solid var(--sola-border-light);
+  background:var(--sola-bg-surface);
+  font-family:inherit;
+  font-size:14px;
+  margin-bottom:12px;
+  box-sizing:border-box;
+  color:var(--sola-text-main);
+}
+.message-form-card textarea{
+  resize:vertical;
+  min-height:90px;
+}
+.btn-send-msg{
+  background:var(--sola-primary-olive);
+  color:#fff;
+  border:none;
+  padding:11px 22px;
+  border-radius:999px;
+  font-family:inherit;
+  font-size:14px;
+  font-weight:600;
+  cursor:pointer;
+  transition:background .2s;
+}
+.btn-send-msg:hover{background:var(--sola-primary-hover)}
+.msg-card{
+  background:var(--sola-bg-subtle);
+  border-radius:16px;
+  padding:16px;
+  margin-bottom:12px;
+  text-align:left;
+  position:relative;
+}
+.msg-card strong{
+  display:block;
+  font-size:14px;
+  color:var(--sola-text-main);
+  margin-bottom:4px;
+}
+.msg-card p{
+  margin:0;
+  font-size:13px;
+  line-height:1.5;
+  color:var(--sola-text-muted);
+  white-space:pre-wrap;
+}
+
+/* FOOTER & ADMIN */
+.sola-footer{
+  margin-top:18px;
+  display:flex;
+  justify-content:center;
+  gap:12px;
+  font-size:12px;
+}
+.btn-admin-link{
+  background:none;
+  border:none;
+  color:var(--sola-text-light);
+  cursor:pointer;
+  font-size:12px;
+  text-decoration:underline;
+  padding:6px;
+  transition:color .2s;
+}
+.btn-admin-link:hover{color:var(--sola-text-main)}
+
+/* TOAST STATUS NOTIFICATIONS */
+.toast-msg{
+  position:fixed;
+  bottom:26px;
+  left:50%;
+  transform:translateX(-50%) translateY(20px);
+  background:#232420f2;
+  color:#fff;
+  padding:12px 22px;
+  border-radius:999px;
+  font-size:13px;
+  font-weight:500;
+  box-shadow:0 10px 30px rgba(0,0,0,0.2);
+  z-index:9999;
+  opacity:0;
+  pointer-events:none;
+  transition:all .3s cubic-bezier(0.16,1,0.3,1);
+  display:flex;
+  align-items:center;
+  gap:8px;
+  max-width:90%;
+  text-align:center;
+  backdrop-filter:blur(8px);
+}
+.toast-msg.show{
+  opacity:1;
+  transform:translateX(-50%) translateY(0);
+}
+
+/* MODALS */
+.sola-modal{
+  position:fixed;
+  inset:0;
+  background:rgba(20,20,20,0.6);
+  backdrop-filter:blur(6px);
+  z-index:1000;
+  display:none;
+  align-items:center;
+  justify-content:center;
+  padding:20px;
+}
 .sola-modal.open{display:flex}
-.sola-modal-panel{position:relative;width:min(620px,100%);max-height:90dvh;overflow:auto;background:#f4f1eb;border-radius:12px;padding:26px}
-.sola-modal-close{position:sticky;top:0;float:right;background:#f4f1eb;z-index:1;padding:8px 12px}
-.sola-modal #seccionMensajes{margin-top:12px!important}
-@media(max-width:700px){
- body{padding-top:0;padding-bottom:82px}
- .sola-nav{top:auto;bottom:0;border-top:1px solid #d9d5cd;border-bottom:0;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;padding:8px max(8px,env(safe-area-inset-right)) calc(8px + env(safe-area-inset-bottom)) max(8px,env(safe-area-inset-left))}
- .sola-nav button{font-size:12px;padding:10px 5px;line-height:1.3;width:100%}
- .sola-nav .desktop-only{display:none}
- .sola-more{display:block}
- .sola-more-menu{bottom:calc(100% + 8px)}
- .sola-modal{padding:12px}
- .sola-modal-panel{padding:18px;max-height:88dvh}
+.modal-box{
+  background:#fff;
+  width:100%;
+  max-width:380px;
+  border-radius:28px;
+  padding:28px 24px;
+  text-align:center;
+  position:relative;
+  box-shadow:0 16px 40px rgba(0,0,0,0.18);
+  animation:modalScale .25s cubic-bezier(0.16,1,0.3,1);
 }
-@media(min-width:701px){.sola-more{display:none}}
+@keyframes modalScale{from{transform:scale(0.92);opacity:0}to{transform:scale(1);opacity:1}}
+.modal-close-btn{
+  position:absolute;
+  top:16px;
+  right:16px;
+  background:#f0ece4;
+  border:none;
+  width:32px;
+  height:32px;
+  border-radius:50%;
+  font-size:15px;
+  color:#666;
+  cursor:pointer;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+.qr-container{
+  margin:20px auto;
+  max-width:220px;
+  background:#fff;
+  padding:12px;
+  border-radius:16px;
+  box-shadow:0 4px 16px rgba(0,0,0,0.06);
+}
+.qr-container svg{width:100%;height:auto;display:block}
 
-/* Proyección: reserva un lateral para que el QR nunca tape las fotos.
-   El QR queda anclado abajo a la derecha, incluso con fotos verticales. */
+/* LIGHTBOX & PROJECTION */
+.lightbox{
+  position:fixed;
+  inset:0;
+  background:#0e0e0fed;
+  display:none;
+  align-items:center;
+  justify-content:center;
+  z-index:9000;
+  padding:24px;
+}
+.lightbox img{
+  max-width:100%;
+  max-height:85vh;
+  object-fit:contain;
+  border-radius:8px;
+}
+.lightbox-close{
+  position:absolute;
+  right:20px;
+  top:20px;
+  color:#fff;
+  font-size:32px;
+  background:none;
+  border:none;
+  cursor:pointer;
+  z-index:2;
+}
 .lightbox.sola-projecting{
- --sola-qr-width:clamp(105px, min(11vw, 22vh), 190px);
- --sola-qr-gap:clamp(12px, 2vw, 30px);
- padding:16px;
- padding-right:calc(var(--sola-qr-width) + var(--sola-qr-gap) + 16px);
-}
-.lightbox.sola-projecting #large{
- max-width:100%;max-height:calc(100dvh - 32px);object-fit:contain;min-width:0;
-}
-/* En proyección: sin descarga y con salida siempre visible. */
-.lightbox.sola-projecting{z-index:40}
-.lightbox.sola-projecting .download-photo{display:none}
-.lightbox.sola-projecting .close{
- display:flex;align-items:center;justify-content:center;
- position:absolute;top:16px;right:16px;z-index:2;
- width:42px;height:42px;padding:0;border:1px solid #ffffff80;
- border-radius:50%;background:#151515cc;color:#fff;
- font-size:28px;line-height:1;cursor:pointer;
+  --sola-qr-width:clamp(105px, min(11vw, 22vh), 190px);
+  --sola-qr-gap:clamp(12px, 2vw, 30px);
+  padding:16px;
+  padding-right:calc(var(--sola-qr-width) + var(--sola-qr-gap) + 16px);
 }
 .sola-projection-side{display:none}
 .lightbox.sola-projecting .sola-projection-side{
- display:block;position:absolute;right:16px;bottom:16px;
- width:var(--sola-qr-width);text-align:center;color:#fff;
- font:clamp(11px, 1vw, 15px)/1.3 Arial,sans-serif;
+  display:block;
+  position:absolute;
+  right:20px;
+  bottom:20px;
+  width:var(--sola-qr-width);
+  text-align:center;
+  color:#fff;
+  font-size:13px;
 }
 .sola-projection-side strong{display:block;margin-bottom:8px;font-weight:normal}
-.sola-projection-side strong span{display:block}
-#solaProjectionQR{width:100%;background:#fff;border-radius:3px;overflow:hidden}
+#solaProjectionQR{width:100%;background:#fff;border-radius:6px;overflow:hidden;padding:6px}
 #solaProjectionQR svg{display:block;width:100%;height:auto}
-@media(max-width:650px){
- .lightbox.sola-projecting{--sola-qr-width:clamp(88px, 23vw, 115px);--sola-qr-gap:8px;padding:8px;padding-right:calc(var(--sola-qr-width) + 16px)}
- .lightbox.sola-projecting #large{max-height:calc(100dvh - 16px)}
- .lightbox.sola-projecting .sola-projection-side{right:8px;bottom:8px}
-}
 </style>
 </head>
 <body>
-<nav class="sola-nav" aria-label="Acciones del álbum">
-<button type="button" id="navUpload">▧ Fotos y videos</button>
-<button type="button" id="navMessages">☏ Mensajes</button>
-<button type="button" class="desktop-only" id="navProject">▣ Proyectar</button>
-<button type="button" class="desktop-only" id="navAdmin">⚙ Administrar</button>
-<div class="sola-more"><button type="button" id="navMore" aria-expanded="false" aria-controls="navMoreMenu">⋯ Más</button>
-<div class="sola-more-menu" id="navMoreMenu">
-<button type="button" id="navMoreProject">Proyectar álbum</button>
-<button type="button" id="navMoreAdmin">Administrar mi álbum</button>
-</div></div>
-</nav>
-<div class="sola-modal" id="navMessageModal" role="dialog" aria-modal="true" aria-label="Mensajes del álbum">
-<div class="sola-modal-panel"><button class="sola-modal-close" type="button" id="navCloseMessages" aria-label="Cerrar mensajes">✕ Cerrar</button><div id="navMessageSlot"></div></div>
+
+<div class="app-container">
+
+  <!-- VINTAGE RETRO CAMERA HEADER -->
+  <header class="camera-hero">
+    <svg class="camera-svg" viewBox="0 0 500 210" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <!-- Gradients for realistic metallic and leather materials -->
+        <linearGradient id="silverDial" x1="0" y1="0" x2="1" y2="0">
+          <stop offset="0%" stop-color="#9C9588"/>
+          <stop offset="25%" stop-color="#EBE7DE"/>
+          <stop offset="50%" stop-color="#C2BAAD"/>
+          <stop offset="75%" stop-color="#FFFFFF"/>
+          <stop offset="100%" stop-color="#8E877B"/>
+        </linearGradient>
+        <linearGradient id="silverTopPlate" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#FFFFFF"/>
+          <stop offset="15%" stop-color="#E8E4DA"/>
+          <stop offset="75%" stop-color="#D4CBBB"/>
+          <stop offset="100%" stop-color="#ABA293"/>
+        </linearGradient>
+        <linearGradient id="leatherette" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#DCD5C8"/>
+          <stop offset="50%" stop-color="#D0C7B8"/>
+          <stop offset="100%" stop-color="#C3B9A9"/>
+        </linearGradient>
+        <linearGradient id="lensOuterRing" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0%" stop-color="#FFFFFF"/>
+          <stop offset="30%" stop-color="#C8C0B2"/>
+          <stop offset="70%" stop-color="#736B5E"/>
+          <stop offset="100%" stop-color="#E5E0D5"/>
+        </linearGradient>
+        <radialGradient id="lensGlass" cx="50%" cy="45%" r="50%">
+          <stop offset="0%" stop-color="#343B45"/>
+          <stop offset="45%" stop-color="#181B20"/>
+          <stop offset="75%" stop-color="#0E0F12"/>
+          <stop offset="100%" stop-color="#050608"/>
+        </radialGradient>
+        <linearGradient id="glassFlare" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0%" stop-color="#65768B" stop-opacity="0.6"/>
+          <stop offset="40%" stop-color="#A5B4C7" stop-opacity="0.15"/>
+          <stop offset="100%" stop-color="#413B56" stop-opacity="0"/>
+        </linearGradient>
+      </defs>
+
+      <!-- Top Dials -->
+      <rect x="75" y="6" width="70" height="22" rx="3" fill="url(#silverDial)"/>
+      <line x1="85" y1="6" x2="85" y2="28" stroke="#7A7265" stroke-width="1"/>
+      <line x1="95" y1="6" x2="95" y2="28" stroke="#7A7265" stroke-width="1"/>
+      <line x1="105" y1="6" x2="105" y2="28" stroke="#7A7265" stroke-width="1"/>
+      <line x1="115" y1="6" x2="115" y2="28" stroke="#7A7265" stroke-width="1"/>
+      <line x1="125" y1="6" x2="125" y2="28" stroke="#7A7265" stroke-width="1"/>
+      <line x1="135" y1="6" x2="135" y2="28" stroke="#7A7265" stroke-width="1"/>
+
+      <!-- Right Shutter & Small Dial -->
+      <rect x="365" y="12" width="28" height="16" rx="2" fill="url(#silverDial)"/>
+      <rect x="405" y="8" width="45" height="20" rx="3" fill="url(#silverDial)"/>
+
+      <!-- Camera Body: Top Metal Plate -->
+      <path d="M 30,26 L 470,26 Q 488,26 488,44 L 488,68 L 12,68 L 12,44 Q 12,26 30,26 Z" fill="url(#silverTopPlate)"/>
+      <rect x="12" y="68" width="476" height="5" fill="#968E80"/>
+
+      <!-- Camera Body: Warm Textured Leatherette -->
+      <rect x="12" y="73" width="476" height="137" fill="url(#leatherette)"/>
+
+      <!-- Viewfinder on right -->
+      <rect x="368" y="36" width="62" height="26" rx="5" fill="#1C2026" stroke="#9E9689" stroke-width="2"/>
+      <rect x="372" y="40" width="54" height="18" rx="3" fill="#2E3744"/>
+      <path d="M 374,42 Q 395,50 422,46" stroke="#5D7391" stroke-width="2" fill="none" opacity="0.6"/>
+
+      <!-- Main Vintage Lens Assembly (Centered at x=250, y=105, radius 96) -->
+      <!-- Shadow behind lens -->
+      <circle cx="250" cy="105" r="96" fill="#000000" opacity="0.12"/>
+      
+      <!-- Outer Metal Bezel -->
+      <circle cx="250" cy="105" r="92" fill="url(#lensOuterRing)" stroke="#787062" stroke-width="1.5"/>
+      
+      <!-- Stepped Inner Rings -->
+      <circle cx="250" cy="105" r="82" fill="#232323" stroke="#8A8275" stroke-width="1"/>
+      <circle cx="250" cy="105" r="74" fill="#383838"/>
+      <circle cx="250" cy="105" r="66" fill="#18181A" stroke="#524D44" stroke-width="1.5"/>
+      
+      <!-- Deep Coated Glass Lens -->
+      <circle cx="250" cy="105" r="58" fill="url(#lensGlass)"/>
+      <circle cx="250" cy="105" r="38" fill="#0A0B0E" opacity="0.85"/>
+      
+      <!-- Glass Specular Reflection Curves -->
+      <path d="M 215,75 A 48 48 0 0 1 285,75 A 44 44 0 0 0 215,75 Z" fill="url(#glassFlare)"/>
+      <ellipse cx="232" cy="88" rx="8" ry="4" fill="#FFFFFF" opacity="0.45" transform="rotate(-25 232 88)"/>
+      <ellipse cx="270" cy="126" rx="14" ry="6" fill="#586A85" opacity="0.25" transform="rotate(30 270 126)"/>
+    </svg>
+  </header>
+
+  <!-- CONTENT CARD -->
+  <main class="content-card">
+    <h1 id="eventoNombre" class="event-title">Cumple 15 Emma</h1>
+    <p id="eventoFecha" class="event-date">22 de noviembre de 2026</p>
+    
+    <div class="heart-divider" aria-hidden="true">
+      <span class="line"></span>
+      <span class="heart">♡</span>
+      <span class="line"></span>
+    </div>
+    
+    <p class="album-badge">Álbum compartido</p>
+
+    <!-- PILL TABS -->
+    <div class="pill-tabs-wrap">
+      <nav class="pill-tabs" role="tablist">
+        <button type="button" id="tabFotos" class="pill-tab active" data-target="seccionFotos" role="tab" aria-selected="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+          <span>Fotos</span>
+        </button>
+        <button type="button" id="tabVideos" class="pill-tab" data-target="seccionVideos" role="tab" aria-selected="false">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2" ry="2"/></svg>
+          <span>Videos</span>
+        </button>
+        <button type="button" id="tabMensajes" class="pill-tab" data-target="seccionMensajes" role="tab" aria-selected="false">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+          <span>Mensajes</span>
+        </button>
+      </nav>
+    </div>
+
+    <!-- SECTIONS -->
+    <!-- 1. FOTOS -->
+    <div id="seccionFotos" class="tab-content active" role="tabpanel">
+      <div id="gallery" class="gallery-grid"></div>
+      <div id="emptyFotos" class="empty-box">
+        <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect width="18" height="18" x="3" y="3" rx="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/></svg>
+        <br>Todavía no hay fotografías.<br>¡Sé la primera persona en compartir un recuerdo!
+      </div>
+    </div>
+
+    <!-- 2. VIDEOS -->
+    <div id="seccionVideos" class="tab-content" role="tabpanel">
+      <div id="videosGallery"></div>
+      <div id="emptyVideos" class="empty-box">
+        <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2" ry="2"/></svg>
+        <br>Todavía no hay videos compartidos.<br>Podés subir videos de hasta 30 segundos.
+      </div>
+    </div>
+
+    <!-- 3. MENSAJES -->
+    <div id="seccionMensajes" class="tab-content" role="tabpanel">
+      <div class="message-form-card">
+        <h3>Dejanos tu dedicatoria</h3>
+        <p>Compartí tus mejores deseos para celebrar este momento.</p>
+        <form id="formMensajes">
+          <input id="nombreMensaje" type="text" placeholder="Tu nombre y apellido" maxlength="80" required>
+          <textarea id="textoMensaje" placeholder="Escribí tu mensaje aquí..." maxlength="1000" required></textarea>
+          <button type="submit" id="btnEnviarMensaje" class="btn-send-msg">Enviar mensaje</button>
+        </form>
+        <p id="estadoMensaje" style="font-size:12px;margin:8px 0 0;color:var(--sola-text-muted)"></p>
+      </div>
+
+      <div id="listaMensajes"></div>
+      <div id="emptyMensajes" class="empty-box" style="display:none">
+        <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+        <br>Todavía no hay mensajes.<br>¡Dejá el primer mensaje de buenos deseos!
+      </div>
+    </div>
+
+    <!-- PRIMARY UPLOAD BUTTON -->
+    <div class="primary-upload-wrap">
+      <button type="button" id="btnSubir" class="btn-primary-upload">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z"/>
+          <path d="M12 12v6"/>
+          <path d="m15 15-3-3-3 3"/>
+        </svg>
+        <span>Subir fotos y videos</span>
+      </button>
+      <input id="files" type="file" accept="image/jpeg,image/png,image/webp,video/mp4" multiple style="display:none">
+    </div>
+
+    <!-- INCOMPLETE URL WARNING (IF ACCESSED DIRECTLY) -->
+    <div id="avisoIncompleto" style="display:none;background:var(--sola-bg-subtle);border-radius:18px;padding:16px;margin-bottom:18px;font-size:13px;line-height:1.5;">
+      <strong>⚠️ Enlace de evento incompleto</strong><br>
+      Para subir tus fotos, abrí el enlace completo o código QR de tu evento.<br>
+      <div style="margin-top:10px;display:flex;gap:8px;justify-content:center;flex-wrap:wrap">
+        <a href="/?evento=sofia-15&clave=15ABC15abc15ABC15abc15ABC" style="padding:6px 12px;background:var(--sola-primary-olive);color:#fff;text-decoration:none;border-radius:999px;font-size:12px;font-weight:600">Ver demo (Sofía · 15)</a>
+        <a href="/admin" style="padding:6px 12px;border:1px solid var(--sola-border-light);color:var(--sola-text-main);text-decoration:none;border-radius:999px;font-size:12px">⚙ Administración</a>
+      </div>
+    </div>
+
+    <!-- BOTTOM ACTION BAR (4 CIRCLES) -->
+    <div class="bottom-action-bar">
+      <button type="button" id="btnProyeccion" class="action-circle-btn">
+        <div class="circle-icon">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="14" x="2" y="3" rx="2"/><line x1="8" x2="16" y1="21" y2="21"/><line x1="12" x2="12" y1="17" y2="21"/></svg>
+        </div>
+        <span>Proyección</span>
+      </button>
+      <button type="button" id="btnDescargar" class="action-circle-btn">
+        <div class="circle-icon">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></svg>
+        </div>
+        <span>Descargar todo</span>
+      </button>
+      <button type="button" id="btnCopiarEnlace" class="action-circle-btn">
+        <div class="circle-icon">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+        </div>
+        <span>Copiar enlace</span>
+      </button>
+      <button type="button" id="btnModalQR" class="action-circle-btn">
+        <div class="circle-icon">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect width="5" height="5" x="3" y="3" rx="1"/><rect width="5" height="5" x="16" y="3" rx="1"/><rect width="5" height="5" x="3" y="16" rx="1"/><path d="M21 16h-3a2 2 0 0 0-2 2v3"/><path d="M21 21v.01"/><path d="M12 7v3a2 2 0 0 1-2 2H7"/><path d="M3 12h.01"/><path d="M12 3h.01"/><path d="M12 16v.01"/><path d="M16 12h1"/><path d="M21 12v.01"/><path d="M12 21v-1"/></svg>
+        </div>
+        <span>Código QR</span>
+      </button>
+    </div>
+
+    <!-- HIDDEN BACKWARDS-COMPATIBILITY HOOKS -->
+    <div style="display:none">
+      <button id="upload"></button>
+      <button id="project"></button>
+      <button id="descargarAlbum"></button>
+      <span id="count"></span>
+      <div id="empty"></div>
+      <div id="status"></div>
+    </div>
+
+    <footer class="sola-footer">
+      <button type="button" id="pareja" class="btn-admin-link">⚙ Administrar mi álbum</button>
+    </footer>
+  </main>
+
 </div>
-<header>SOLA · INVITACIONES</header><main class="wrap"><p class="eyebrow">Álbum compartido · Demo</p><h1 id="eventoNombre">Álbum compartido</h1><p class="intro">Los mejores momentos los construimos entre todos.<br>Compartí tus fotos y reviví cada instante.</p><div class="actions"><button class="primary" id="upload">+ Subir fotos o videos</button><button id="project">Proyectar álbum</button><button id="pareja">Administrar mi álbum</button><button id="descargarAlbum" style="display:none">Descargar álbum completo (ZIP)</button></div><p id="status" class="status" role="status" aria-live="polite"></p><input id="files" type="file" accept="image/jpeg,image/png,image/webp,video/mp4" multiple><div class="top"><strong>Nuestros momentos</strong><span class="count" id="count">0 fotografías</span></div><div id="gallery" class="grid"></div><h2 id="videosTitle" style="display:none;font-family:Georgia,serif;font-weight:400">Videos compartidos</h2><div id="videosGallery" class="grid"></div><div id="empty" class="empty">Todavía no hay fotografías.<br>¡Sé la primera persona en compartir un recuerdo!</div><p class="muted">Las fotografías estarán disponibles hasta 30 días después del evento.</p><div class="note"><strong>Álbum compartido:</strong> Subí tus fotografías y compartí los mejores momentos del evento. Las imágenes estarán disponibles para verlas hasta 30 días después de la celebración.</div>
 
-<section id="seccionMensajes" style="margin-top:35px">
- <h2>Dejanos tu mensaje</h2>
- <p>Compartí tus buenos deseos con los protagonistas.</p>
+<!-- TOAST MESSAGE NOTIFICATION -->
+<div id="toast" class="toast-msg" role="status" aria-live="polite"></div>
 
- <form id="formMensajes">
- <input id="nombreMensaje" type="text" style="display:block;width:100%;box-sizing:border-box;padding:12px;border:1px solid #C9B8A5;border-radius:5px"
- placeholder="Tu nombre" maxlength="80" required>
+<!-- QR MODAL POPUP -->
+<div id="modalQR" class="sola-modal" role="dialog" aria-modal="true" aria-label="Código QR del álbum">
+  <div class="modal-box">
+    <button type="button" class="modal-close-btn" id="closeModalQR" aria-label="Cerrar">✕</button>
+    <h3 style="margin:0 0 6px;font-size:18px;">Escaneá y compartí</h3>
+    <p style="margin:0 0 16px;font-size:13px;color:var(--sola-text-muted);">Tus invitados pueden escanear este código para subir sus fotos al instante.</p>
+    <div id="modalQRSlot" class="qr-container"></div>
+    <button type="button" id="btnDescargarModalQR" class="btn-send-msg" style="width:100%">Descargar imagen QR</button>
+  </div>
+</div>
 
- <textarea id="textoMensaje" style="width:100%;min-height:120px;box-sizing:border-box;padding:12px;border:1px solid #C9B8A5;border-radius:5px;font-family:inherit;resize:vertical"
- placeholder="Escribí tu mensaje..."
- maxlength="1000" required></textarea>
+<!-- LIGHTBOX & PROJECTION MODAL -->
+<div class="lightbox" id="lightbox">
+  <button class="lightbox-close" id="close" aria-label="Cerrar">×</button>
+  <img id="large" alt="Foto ampliada">
+  <a id="descargarFoto" style="position:absolute;left:20px;bottom:20px;color:#fff;border:1px solid #fff;background:#222b;text-decoration:none;padding:10px 16px;font-size:13px;border-radius:999px" href="#" download>Descargar foto</a>
+  <aside class="sola-projection-side" aria-label="Acceso por QR">
+    <strong><span>Escaneá el QR</span><span>¡Compartí tus fotos!</span></strong>
+    <div id="solaProjectionQR"></div>
+  </aside>
+</div>
 
- <button type="submit" style="background:#C9B8A5;color:#333;border:none;padding:14px 28px;border-radius:5px;cursor:pointer;font-family:inherit">Enviar mensaje</button>
- </form>
-
- <p id="estadoMensaje" role="status"></p>
-
- <h3>Mensajes compartidos</h3>
- <div id="listaMensajes"></div>
-</section>
-</main><div class="lightbox" id="lightbox"><button class="close" id="close" aria-label="Cerrar">×</button><img id="large" alt="Foto ampliada"><a id="descargarFoto" class="download-photo" href="#" download>Descargar foto</a><aside class="sola-projection-side" aria-label="Acceso por QR"><strong><span>Escaneá el QR</span><span>¡Compartí tus fotos!</span></strong><div id="solaProjectionQR"></div></aside></div>
 <script>
+// ESTADO GLOBAL Y ELEMENTOS
 const images=[];let videos=[];let clavePareja="";let projecting=false,idx=0,timer=null,loading=false;
-const input=document.getElementById('files'),gallery=document.getElementById('gallery'),empty=document.getElementById('empty'),count=document.getElementById('count'),lightbox=document.getElementById('lightbox'),large=document.getElementById('large'),status=document.getElementById('status'),upload=document.getElementById('upload');
-document.getElementById('pareja').onclick=()=>{
- if(clavePareja){clavePareja='';document.getElementById('descargarAlbum').style.display='none';document.getElementById('pareja').textContent='Administrar mi álbum';cargarFotos();cargarVideos();cargarMensajes();return;}
- const clave=prompt('Ingresá la clave privada del organizador (no la clave del enlace):');
- if(!clave)return;
- if(!/^[a-f0-9]{48}$/i.test(clave.trim())){alert('La clave privada no tiene el formato correcto');return;}
- clavePareja=clave.trim();document.getElementById('descargarAlbum').style.display='inline-block';document.getElementById('pareja').textContent='Salir de administración';cargarFotos();cargarVideos();cargarMensajes();
-};
-document.getElementById('descargarAlbum').onclick=async()=>{
- if(!clavePareja)return;
- const boton=document.getElementById('descargarAlbum');boton.disabled=true;
- status.textContent='Preparando la descarga del álbum…';
- try{
-  // En computadoras se escribe el ZIP por streaming; Android necesita una descarga alternativa.
-  const escritorio=typeof window.showSaveFilePicker==='function' && !/Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
-  let handle=null;
-  if(escritorio){
-    handle=await window.showSaveFilePicker({suggestedName:'Album-completo.zip',types:[{description:'Archivo ZIP',accept:{'application/zip':['.zip']}}]});
-  }
-  const r=await fetch('/descargar-album'+parametros,{method:'POST',headers:{'X-Pareja-Key':clavePareja}});
-  if(!r.ok){const d=await r.json().catch(()=>({}));throw Error(d.error||'No se pudo descargar el álbum');}
-  if(!r.body)throw Error('El navegador no permite esta descarga');
-  if(escritorio){
-    const file=await handle.createWritable();
-    try{await r.body.pipeTo(file)}catch(e){await file.abort().catch(()=>{});throw e}
-  }else{
-    // Alternativa para Android: Blob + enlace de descarga. Limitada para evitar agotar memoria.
-    const limite=80*1024*1024;
-    const lector=r.body.getReader();const partes=[];let total=0;
-    try{
-      while(true){
-        const {done,value}=await lector.read();if(done)break;
-        total+=value.byteLength;
-        if(total>limite){await lector.cancel();throw Error('Este álbum supera los 80 MB. Para descargarlo completo, usá una computadora por ahora.');}
-        partes.push(value);
-        status.textContent='Preparando descarga: '+(total/1048576).toFixed(1)+' MB…';
-      }
-    }finally{lector.releaseLock()}
-    const blob=new Blob(partes,{type:'application/zip'});
-    const url=URL.createObjectURL(blob);
-    const enlace=document.createElement('a');enlace.href=url;enlace.download='Album-completo.zip';
-    document.body.appendChild(enlace);enlace.click();enlace.remove();
-    setTimeout(()=>URL.revokeObjectURL(url),120000);
-  }
-  status.textContent='Álbum completo guardado correctamente.';
- }catch(e){if(e.name!=='AbortError')status.textContent='Descarga: '+e.message;}
- finally{boton.disabled=false}
-};
-async function eliminarArchivo(tipo,nombre){
- if(!clavePareja)return;
- if(!confirm('¿Eliminar este archivo definitivamente? No se puede recuperar.'))return;
- try{
- const r=await fetch('/eliminar-archivo'+parametros,{method:'POST',headers:{'Content-Type':'application/json','X-Pareja-Key':clavePareja},body:JSON.stringify({tipo,nombre})});
- const d=await r.json();if(!r.ok)throw Error(d.error||'No se pudo eliminar');
- status.textContent='Archivo eliminado';await Promise.all([cargarFotos(),cargarVideos()]);
- }catch(e){alert(e.message)}
+const input=document.getElementById('files'),
+      gallery=document.getElementById('gallery'),
+      emptyFotos=document.getElementById('emptyFotos'),
+      emptyVideos=document.getElementById('emptyVideos'),
+      emptyMensajes=document.getElementById('emptyMensajes'),
+      lightbox=document.getElementById('lightbox'),
+      large=document.getElementById('large'),
+      upload=document.getElementById('upload'),
+      status=document.getElementById('status'),
+      btnSubir=document.getElementById('btnSubir'),
+      btnProyeccion=document.getElementById('btnProyeccion'),
+      btnDescargar=document.getElementById('btnDescargar'),
+      btnCopiarEnlace=document.getElementById('btnCopiarEnlace'),
+      btnModalQR=document.getElementById('btnModalQR'),
+      modalQR=document.getElementById('modalQR'),
+      closeModalQR=document.getElementById('closeModalQR'),
+      toast=document.getElementById('toast'),
+      avisoIncompleto=document.getElementById('avisoIncompleto');
+
+// NOTIFICACIÓN TOAST
+function showToast(msj, tiempo=3200){
+  toast.textContent=msj;
+  toast.classList.add('show');
+  setTimeout(()=>{toast.classList.remove('show')}, tiempo);
 }
-function show(url){large.src=url;document.getElementById('descargarFoto').href=url+'&descargar=1';lightbox.style.display='flex'}
-function stop(){clearInterval(timer);timer=null;projecting=false;lightbox.classList.remove('sola-projecting');lightbox.style.display='none'}
+
+// FORMATEO AMIGABLE DE FECHA
+function formatearFecha(fechaStr){
+  if(!fechaStr) return '';
+  try{
+    const partes=fechaStr.split('-');
+    if(partes.length===3){
+      const fecha=new Date(partes[0], partes[1]-1, partes[2]);
+      const meses=['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
+      return `${fecha.getDate()} de ${meses[fecha.getMonth()]} de ${fecha.getFullYear()}`;
+    }
+  }catch(e){}
+  return fechaStr;
+}
+
+// PESTAÑAS (FOTOS / VIDEOS / MENSAJES)
+const tabs=document.querySelectorAll('.pill-tab');
+const tabPanels=document.querySelectorAll('.tab-content');
+tabs.forEach(tab=>{
+  tab.addEventListener('click',()=>{
+    tabs.forEach(t=>{t.classList.remove('active');t.setAttribute('aria-selected','false')});
+    tabPanels.forEach(p=>p.classList.remove('active'));
+    tab.classList.add('active');
+    tab.setAttribute('aria-selected','true');
+    const target=document.getElementById(tab.dataset.target);
+    if(target) target.classList.add('active');
+  });
+});
+
+// DISPARADOR DE SUBIDA
+function iniciarSubida(){
+  if(upload.disabled){
+    alert('Para subir fotos o videos necesitás ingresar con el enlace o código QR de tu evento.');
+    return;
+  }
+  input.click();
+}
+btnSubir.onclick=iniciarSubida;
+upload.onclick=iniciarSubida;
+
+// PROYECCIÓN
+btnProyeccion.onclick=()=>{
+  if(!images.length){
+    alert(upload.disabled ? 'Para proyectar recuerdos necesitás abrir el enlace completo de un evento.' : 'Todavía no hay fotografías para proyectar.');
+    return;
+  }
+  projecting=true;idx=0;show(images[idx]);
+  lightbox.classList.add('sola-projecting');
+  clearInterval(timer);
+  timer=setInterval(()=>{
+    if(!projecting||!images.length)return;
+    idx=(idx+1)%images.length;
+    large.src=images[idx];
+    document.getElementById('descargarFoto').href=images[idx]+'&descargar=1';
+  },3500);
+};
+
+// COPIAR ENLACE
+btnCopiarEnlace.onclick=async()=>{
+  try{
+    await navigator.clipboard.writeText(window.location.href);
+    showToast('¡Enlace del álbum copiado! 📋');
+  }catch(e){
+    prompt('Copiá el enlace de tu álbum:', window.location.href);
+  }
+};
+
+// CÓDIGO QR MODAL
+btnModalQR.onclick=()=>{
+  renderQRModal();
+  modalQR.classList.add('open');
+};
+closeModalQR.onclick=()=>modalQR.classList.remove('open');
+modalQR.onclick=e=>{if(e.target===modalQR)modalQR.classList.remove('open')};
+
+function generarSvgQR(url){
+  const qr=new SolaQR.QRCode(0,SolaQR.level.L);
+  qr.addData(url);
+  qr.make();
+  const n=qr.getModuleCount(),quiet=4,total=n+quiet*2;
+  const svg=document.createElementNS('http://www.w3.org/2000/svg','svg');
+  svg.setAttribute('viewBox',`0 0 ${total} ${total}`);
+  svg.setAttribute('shape-rendering','crispEdges');
+  const bg=document.createElementNS('http://www.w3.org/2000/svg','rect');
+  bg.setAttribute('width',total);bg.setAttribute('height',total);bg.setAttribute('fill','#fff');
+  svg.appendChild(bg);
+  for(let r=0;r<n;r++)for(let c=0;c<n;c++)if(qr.isDark(r,c)){
+    const rect=document.createElementNS('http://www.w3.org/2000/svg','rect');
+    rect.setAttribute('x',c+quiet);rect.setAttribute('y',r+quiet);
+    rect.setAttribute('width',1);rect.setAttribute('height',1);rect.setAttribute('fill','#111');
+    svg.appendChild(rect);
+  }
+  return svg;
+}
+
+function renderQRModal(){
+  const slot=document.getElementById('modalQRSlot');
+  slot.innerHTML='';
+  try{
+    const svg=generarSvgQR(window.location.href);
+    slot.appendChild(svg);
+  }catch(e){
+    slot.innerHTML='<p style="font-size:12px;color:#999">QR disponible al conectarse al evento</p>';
+  }
+}
+document.getElementById('btnDescargarModalQR').onclick=()=>{
+  showToast('Guardando código QR...');
+  const svg=document.querySelector('#modalQRSlot svg');
+  if(!svg){alert('No se pudo generar la imagen del QR');return;}
+  const svgData=new XMLSerializer().serializeToString(svg);
+  const blob=new Blob([svgData], {type:'image/svg+xml;charset=utf-8'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  a.href=url;
+  a.download='QR-Album-Sola.svg';
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+};
+
+// ADMINISTRACIÓN DE LA PAREJA
+document.getElementById('pareja').onclick=()=>{
+  if(clavePareja){
+    clavePareja='';
+    document.getElementById('pareja').textContent='⚙ Administrar mi álbum';
+    showToast('Modo administración desactivado');
+    cargarFotos();cargarVideos();cargarMensajes();
+    return;
+  }
+  const clave=prompt('Ingresá la clave privada del organizador (novios/anfitriones):');
+  if(!clave) return;
+  if(!/^[a-f0-9]{48}$/i.test(clave.trim())){
+    alert('La clave privada no tiene el formato correcto');
+    return;
+  }
+  clavePareja=clave.trim();
+  document.getElementById('pareja').textContent='Salir de administración';
+  showToast('¡Modo administración activado!');
+  cargarFotos();cargarVideos();cargarMensajes();
+};
+
+// DESCARGAR TODO
+btnDescargar.onclick=()=>{
+  if(!clavePareja){
+    if(confirm('La descarga completa del álbum en ZIP está reservada para los anfitriones.\n\n¿Querés ingresar tu clave privada de novios para descargar?')){
+      document.getElementById('pareja').click();
+    }
+    return;
+  }
+  ejecutarDescargaZIP();
+};
+
+async function ejecutarDescargaZIP(){
+  btnDescargar.disabled=true;
+  showToast('Preparando descarga del álbum en ZIP…', 6000);
+  try{
+    const escritorio=typeof window.showSaveFilePicker==='function' && !/Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+    let handle=null;
+    if(escritorio){
+      handle=await window.showSaveFilePicker({suggestedName:'Album-completo.zip',types:[{description:'Archivo ZIP',accept:{'application/zip':['.zip']}}]});
+    }
+    const r=await fetch('/descargar-album'+parametros,{method:'POST',headers:{'X-Pareja-Key':clavePareja}});
+    if(!r.ok){const d=await r.json().catch(()=>({}));throw Error(d.error||'No se pudo descargar el álbum');}
+    if(!r.body)throw Error('El navegador no permite esta descarga');
+    if(escritorio){
+      const file=await handle.createWritable();
+      try{await r.body.pipeTo(file)}catch(e){await file.abort().catch(()=>{});throw e}
+    }else{
+      const limite=80*1024*1024;
+      const lector=r.body.getReader();const partes=[];let total=0;
+      try{
+        while(true){
+          const {done,value}=await lector.read();if(done)break;
+          total+=value.byteLength;
+          if(total>limite){await lector.cancel();throw Error('Supera los 80 MB. Para descargarlo completo usá una computadora.');}
+          partes.push(value);
+        }
+      }finally{lector.releaseLock()}
+      const blob=new Blob(partes,{type:'application/zip'});
+      const url=URL.createObjectURL(blob);
+      const enlace=document.createElement('a');enlace.href=url;enlace.download='Album-completo.zip';
+      document.body.appendChild(enlace);enlace.click();enlace.remove();
+      setTimeout(()=>URL.revokeObjectURL(url),120000);
+    }
+    showToast('¡Álbum completo descargado correctamente!');
+  }catch(e){
+    if(e.name!=='AbortError') showToast('Descarga: '+e.message);
+  }finally{
+    btnDescargar.disabled=false;
+  }
+}
+
+// ELIMINACIÓN DE ARCHIVOS
+async function eliminarArchivo(tipo,nombre){
+  if(!clavePareja)return;
+  if(!confirm('¿Eliminar este archivo definitivamente? No se puede recuperar.'))return;
+  try{
+    const r=await fetch('/eliminar-archivo'+parametros,{method:'POST',headers:{'Content-Type':'application/json','X-Pareja-Key':clavePareja},body:JSON.stringify({tipo,nombre})});
+    const d=await r.json();if(!r.ok)throw Error(d.error||'No se pudo eliminar');
+    showToast('Archivo eliminado');
+    await Promise.all([cargarFotos(),cargarVideos()]);
+  }catch(e){alert(e.message)}
+}
+
+// LIGHTBOX VISOR
+function show(url){
+  large.src=url;
+  document.getElementById('descargarFoto').href=url+'&descargar=1';
+  lightbox.style.display='flex';
+}
+function stop(){
+  clearInterval(timer);timer=null;projecting=false;
+  lightbox.classList.remove('sola-projecting');
+  lightbox.style.display='none';
+}
 document.getElementById('close').onclick=stop;
 lightbox.onclick=e=>{if(e.target===lightbox)stop()};
 document.addEventListener('keydown',e=>{if(e.key==='Escape')stop()});
-document.getElementById('project').onclick=()=>{if(!images.length){alert('Todavía no hay fotografías para proyectar.');return}projecting=true;idx=0;show(images[idx]);lightbox.classList.add('sola-projecting');clearInterval(timer);timer=setInterval(()=>{if(!projecting||!images.length)return;idx=(idx+1)%images.length;large.src=images[idx];document.getElementById('descargarFoto').href=images[idx]+'&descargar=1'},3500)};
-upload.onclick=()=>iniciarSubida();
-function iniciarSubida(){
- if(upload.disabled){
-  alert('Para subir fotos o videos necesitás ingresar con el enlace o código QR específico de tu evento.');
-  return;
- }
- input.click();
+
+// SUBIDA Y COMPRESIÓN
+function comprobarDuracion(archivo){
+  return new Promise((resolve,reject)=>{
+    const video=document.createElement('video');
+    const url=URL.createObjectURL(archivo);
+    const limpiar=()=>{video.removeAttribute('src');video.load();URL.revokeObjectURL(url)};
+    video.preload='metadata';
+    video.onloadedmetadata=()=>{
+      const segundos=video.duration;limpiar();
+      Number.isFinite(segundos)&&segundos>0&&segundos<=30?resolve():reject(new Error('El video debe durar como máximo 30 segundos'));
+    };
+    video.onerror=()=>{limpiar();reject(new Error('No se pudo verificar la duración del video'))};
+    video.src=url;
+  });
 }
-function comprobarDuracion(archivo){return new Promise((resolve,reject)=>{const video=document.createElement('video');const url=URL.createObjectURL(archivo);const limpiar=()=>{video.removeAttribute('src');video.load();URL.revokeObjectURL(url)};video.preload='metadata';video.onloadedmetadata=()=>{const segundos=video.duration;limpiar();Number.isFinite(segundos)&&segundos>0&&segundos<=30?resolve():reject(new Error('El video debe durar como máximo 30 segundos'))};video.onerror=()=>{limpiar();reject(new Error('No se pudo verificar la duración del video'))};video.src=url})}
-async function cargarFotos(){if(loading)return;loading=true;try{const respuesta=await fetch('/fotos'+parametros,{cache:'no-store'});if(!respuesta.ok)throw new Error('No se pudo cargar el álbum');const datos=await respuesta.json();document.getElementById('eventoNombre').textContent=datos.nombreEvento||'Álbum compartido';const nuevas=(datos.fotos||[]).map(f=>f.url);if(images.length!==nuevas.length||images.some((url,i)=>url!==nuevas[i])||gallery.dataset.admin!==(clavePareja?"1":"0")){gallery.dataset.admin=clavePareja?"1":"0";images.splice(0,images.length,...nuevas);gallery.replaceChildren();for(const url of images){const div=document.createElement('div');div.className='photo';const img=document.createElement('img');img.src=url;img.alt='Fotografía compartida';img.loading='lazy';img.onclick=()=>show(url);div.appendChild(img);if(clavePareja){const b=document.createElement('button');b.textContent='Eliminar foto';b.style.marginTop='6px';b.onclick=()=>{const nombre=new URL(url,location.origin).searchParams.get('nombre');eliminarArchivo('foto',nombre)};div.appendChild(b)}gallery.appendChild(div)}count.textContent=images.length+' fotografía'+(images.length===1?'':'s');empty.style.display=images.length?'none':'block'}}catch(error){console.error(error);status.textContent='No se pudo actualizar la galería. Intentaremos nuevamente.'}finally{loading=false}}
-// Reduce imágenes grandes en el dispositivo antes de enviarlas, sin servicios externos.
+
 async function prepararFoto(archivo){
- const limite=20*1024*1024;
- if(archivo.size<=limite)return archivo;
- if(!['image/jpeg','image/png','image/webp'].includes(archivo.type))throw Error('Formato no compatible. Usá JPG, PNG o WebP.');
- let bitmap;
- try{bitmap=await createImageBitmap(archivo)}catch{throw Error('El navegador no pudo procesar esta fotografía.');}
- try{
-  let ancho=bitmap.width,alto=bitmap.height;
-  for(const maxLado of [4096,3200,2560,2048,1600]){
-   const escala=Math.min(1,maxLado/Math.max(ancho,alto));
-   const canvas=document.createElement('canvas');canvas.width=Math.max(1,Math.round(ancho*escala));canvas.height=Math.max(1,Math.round(alto*escala));
-   const ctx=canvas.getContext('2d');if(!ctx)throw Error('No se pudo procesar la fotografía.');
-   ctx.drawImage(bitmap,0,0,canvas.width,canvas.height);
-   for(const calidad of [0.9,0.8,0.7]){
-    const blob=await new Promise(resolve=>canvas.toBlob(resolve,'image/jpeg',calidad));
-    if(blob&&blob.size>0&&blob.size<=limite)return new File([blob],archivo.name.replace(/\.[^.]+$/, '')+'-optimizada.jpg',{type:'image/jpeg'});
-   }
-  }
-  throw Error('No fue posible reducir esta fotografía a 20 MB.');
- }finally{bitmap.close?.()}
+  const limite=20*1024*1024;
+  if(archivo.size<=limite)return archivo;
+  if(!['image/jpeg','image/png','image/webp'].includes(archivo.type))throw Error('Formato no compatible. Usá JPG, PNG o WebP.');
+  let bitmap;
+  try{bitmap=await createImageBitmap(archivo)}catch{throw Error('No se pudo procesar la fotografía.');}
+  try{
+    let ancho=bitmap.width,alto=bitmap.height;
+    for(const maxLado of [4096,3200,2560,2048,1600]){
+      const escala=Math.min(1,maxLado/Math.max(ancho,alto));
+      const canvas=document.createElement('canvas');canvas.width=Math.max(1,Math.round(ancho*escala));canvas.height=Math.max(1,Math.round(alto*escala));
+      const ctx=canvas.getContext('2d');if(!ctx)throw Error('No se pudo procesar la fotografía.');
+      ctx.drawImage(bitmap,0,0,canvas.width,canvas.height);
+      for(const calidad of [0.9,0.8,0.7]){
+        const blob=await new Promise(resolve=>canvas.toBlob(resolve,'image/jpeg',calidad));
+        if(blob&&blob.size>0&&blob.size<=limite)return new File([blob],archivo.name.replace(/\.[^.]+$/, '')+'-optimizada.jpg',{type:'image/jpeg'});
+      }
+    }
+    throw Error('No fue posible reducir esta fotografía a 20 MB.');
+  }finally{bitmap.close?.()}
 }
-input.onchange=async()=>{const archivos=[...input.files];if(!archivos.length)return;upload.disabled=true;let errores=[];for(const archivo of archivos){const esVideo=archivo.type==='video/mp4';if(esVideo?archivo.size>25*1024*1024:!['image/jpeg','image/png','image/webp'].includes(archivo.type)){errores.push(archivo.name+': formato o tamaño inválido (foto JPG/PNG/WebP, video MP4 de hasta 25 MB)');continue}try{if(esVideo)await comprobarDuracion(archivo);if(!esVideo&&archivo.size>20*1024*1024)status.textContent='Optimizando '+archivo.name+'…';const preparado=esVideo?archivo:await prepararFoto(archivo);status.textContent='Subiendo '+archivo.name+'…';const respuesta=await fetch((esVideo?'/videos':'/fotos')+parametros,{method:'POST',headers:{'Content-Type':preparado.type},body:preparado});if(!respuesta.ok){let mensaje='Error al subir';try{mensaje=(await respuesta.json()).error||mensaje}catch{}throw new Error(mensaje)}}catch(error){errores.push(archivo.name+': '+error.message)}}input.value='';upload.disabled=false;await Promise.all([cargarFotos(),cargarVideos()]);status.textContent=errores.length?errores.join(' | '):'¡Archivos compartidos correctamente!'};
-const qs=new URLSearchParams(window.location.search);const ruta=decodeURIComponent(window.location.pathname.replace(/^\/+|\/+$/g,''));if(ruta&&!qs.has('evento'))qs.set('evento',ruta);const parametros='?'+qs.toString();if(!qs.has('evento')||!qs.has('clave')){document.getElementById('eventoNombre').textContent='Enlace de álbum incompleto';status.innerHTML='Para ver o subir recuerdos, por favor abrí el enlace completo de tu evento.<br><div style="margin-top:14px;display:flex;gap:10px;justify-content:center;flex-wrap:wrap"><a href="/?evento=sofia-15&clave=15ABC15abc15ABC15abc15ABC" style="display:inline-block;padding:9px 16px;background:#C9B8A5;color:#292929;text-decoration:none;border-radius:6px;font-size:13px;font-weight:bold">Ver álbum de prueba (Sofía · 15)</a><a href="/admin" style="display:inline-block;padding:9px 16px;border:1px solid #C9B8A5;color:#4B4B4D;text-decoration:none;border-radius:6px;font-size:13px">⚙ Ir a Administración</a></div>';upload.disabled=true;document.getElementById('project').disabled=true;}else{cargarFotos();cargarVideos();setInterval(()=>{cargarFotos();cargarVideos()},10000);}
 
-async function cargarVideos(){try{const cont=document.getElementById('videosGallery');const r=await fetch('/videos'+parametros,{cache:'no-store'});if(!r.ok)throw Error('No se pudieron cargar videos');const d=await r.json();const nuevas=d.videos||[];if(JSON.stringify(nuevas.map(v=>v.url))===JSON.stringify(videos.map(v=>v.url))&&cont.dataset.admin===(clavePareja?"1":"0"))return;videos=nuevas;cont.dataset.admin=clavePareja?'1':'0';cont.replaceChildren();document.getElementById('videosTitle').style.display=videos.length?'block':'none';for(const v of videos){const item=document.createElement('div');const vid=document.createElement('video');vid.src=v.url;vid.controls=true;vid.preload='metadata';vid.playsInline=true;vid.style.cssText='width:100%;background:#222;border-radius:3px';item.appendChild(vid);if(clavePareja){const b=document.createElement('button');b.textContent='Eliminar video';b.onclick=()=>eliminarArchivo('video',v.nombre);item.appendChild(b)}cont.appendChild(item)}}catch(e){console.error(e)}}
+input.onchange=async()=>{
+  const archivos=[...input.files];
+  if(!archivos.length)return;
+  upload.disabled=true;btnSubir.disabled=true;
+  let errores=[];
+  for(const archivo of archivos){
+    const esVideo=archivo.type==='video/mp4';
+    if(esVideo?archivo.size>25*1024*1024:!['image/jpeg','image/png','image/webp'].includes(archivo.type)){
+      errores.push(archivo.name+': formato o peso no admitido');continue;
+    }
+    try{
+      if(esVideo) await comprobarDuracion(archivo);
+      showToast('Subiendo '+archivo.name+'…', 5000);
+      const preparado=esVideo?archivo:await prepararFoto(archivo);
+      const respuesta=await fetch((esVideo?'/videos':'/fotos')+parametros,{method:'POST',headers:{'Content-Type':preparado.type},body:preparado});
+      if(!respuesta.ok){
+        let mensaje='Error al subir';try{mensaje=(await respuesta.json()).error||mensaje}catch{}
+        throw new Error(mensaje);
+      }
+    }catch(error){errores.push(archivo.name+': '+error.message)}
+  }
+  input.value='';upload.disabled=false;btnSubir.disabled=false;
+  await Promise.all([cargarFotos(),cargarVideos()]);
+  showToast(errores.length?errores.join(' | '):'¡Recuerdos compartidos correctamente! ✨');
+};
 
+// URL PARAMS Y ARRANQUE
+const qs=new URLSearchParams(window.location.search);
+const ruta=decodeURIComponent(window.location.pathname.replace(/^\/+|\/+$/g,''));
+if(ruta&&!qs.has('evento'))qs.set('evento',ruta);
+const parametros='?'+qs.toString();
+
+if(!qs.has('evento')||!qs.has('clave')){
+  document.getElementById('eventoNombre').textContent='Cumple 15 Emma';
+  document.getElementById('eventoFecha').textContent='22 de noviembre de 2026';
+  avisoIncompleto.style.display='block';
+  upload.disabled=true;
+  btnSubir.style.opacity='0.85';
+}else{
+  cargarFotos();cargarVideos();
+  setInterval(()=>{cargarFotos();cargarVideos()},10000);
+}
+
+// CARGA DE FOTOS
+async function cargarFotos(){
+  if(loading)return;loading=true;
+  try{
+    const respuesta=await fetch('/fotos'+parametros,{cache:'no-store'});
+    if(!respuesta.ok)throw new Error('No se pudo cargar el álbum');
+    const datos=await respuesta.json();
+    if(datos.nombreEvento) document.getElementById('eventoNombre').textContent=datos.nombreEvento;
+    if(datos.fechaEvento) document.getElementById('eventoFecha').textContent=formatearFecha(datos.fechaEvento);
+    
+    const nuevas=(datos.fotos||[]).map(f=>f.url);
+    if(images.length!==nuevas.length||images.some((url,i)=>url!==nuevas[i])||gallery.dataset.admin!==(clavePareja?"1":"0")){
+      gallery.dataset.admin=clavePareja?"1":"0";
+      images.splice(0,images.length,...nuevas);
+      gallery.replaceChildren();
+      for(const url of images){
+        const div=document.createElement('div');div.className='photo';
+        const img=document.createElement('img');img.src=url;img.alt='Recuerdo compartido';img.loading='lazy';
+        img.onclick=()=>show(url);
+        div.appendChild(img);
+        if(clavePareja){
+          const b=document.createElement('button');b.textContent='✕ Eliminar';b.className='del-btn';
+          b.onclick=(e)=>{e.stopPropagation();const nombre=new URL(url,location.origin).searchParams.get('nombre');eliminarArchivo('foto',nombre)};
+          div.appendChild(b);
+        }
+        gallery.appendChild(div);
+      }
+      emptyFotos.style.display=images.length?'none':'block';
+    }
+  }catch(error){
+    console.error(error);
+  }finally{loading=false}
+}
+
+// CARGA DE VIDEOS
+async function cargarVideos(){
+  try{
+    const cont=document.getElementById('videosGallery');
+    const r=await fetch('/videos'+parametros,{cache:'no-store'});
+    if(!r.ok)throw Error('No se pudieron cargar videos');
+    const d=await r.json();
+    const nuevas=d.videos||[];
+    if(JSON.stringify(nuevas.map(v=>v.url))===JSON.stringify(videos.map(v=>v.url))&&cont.dataset.admin===(clavePareja?"1":"0"))return;
+    videos=nuevas;
+    cont.dataset.admin=clavePareja?'1':'0';
+    cont.replaceChildren();
+    for(const v of videos){
+      const item=document.createElement('div');item.className='video-card';
+      const vid=document.createElement('video');vid.src=v.url;vid.controls=true;vid.preload='metadata';vid.playsInline=true;
+      item.appendChild(vid);
+      if(clavePareja){
+        const b=document.createElement('button');b.textContent='✕ Eliminar video';b.className='del-btn';
+        b.onclick=()=>eliminarArchivo('video',v.nombre);
+        item.appendChild(b);
+      }
+      cont.appendChild(item);
+    }
+    emptyVideos.style.display=videos.length?'none':'block';
+  }catch(e){console.error(e)}
+}
 
 // MENSAJES DE LOS INVITADOS
-const formularioMensajes = document.getElementById("formMensajes");
-const listaMensajes = document.getElementById("listaMensajes");
-const estadoMensaje = document.getElementById("estadoMensaje");
+const formularioMensajes=document.getElementById("formMensajes");
+const listaMensajes=document.getElementById("listaMensajes");
+const estadoMensaje=document.getElementById("estadoMensaje");
 
-async function cargarMensajes() {
-  try {
-    const respuesta = await fetch("/mensajes" + location.search);
-    if (!respuesta.ok) throw new Error("No se pudieron cargar los mensajes");
-
-    const datos = await respuesta.json();
+async function cargarMensajes(){
+  try{
+    const respuesta=await fetch("/mensajes"+location.search);
+    if(!respuesta.ok)throw new Error("No se pudieron cargar los mensajes");
+    const datos=await respuesta.json();
     listaMensajes.replaceChildren();
-
-    for (const mensaje of datos.mensajes) {
-      const tarjeta = document.createElement("div");
-      tarjeta.style.cssText =
-        "padding:15px;margin:12px 0;background:#F4F1EB;border-radius:8px";
-
-      const nombre = document.createElement("strong");
-      nombre.textContent = mensaje.nombre;
-
-      const texto = document.createElement("p");
-      texto.textContent = mensaje.texto;
-      texto.style.whiteSpace = "pre-wrap";
-
- 
-if (clavePareja) {
-  const botonEliminar = document.createElement("button");
-  botonEliminar.textContent = "Eliminar mensaje";
-  botonEliminar.style.cssText =
-    "background:#C9B8A5;color:#333;border:none;padding:8px 14px;border-radius:5px;cursor:pointer;margin-top:8px";
-
-  botonEliminar.addEventListener("click", async () => {
-    if (!confirm("¿Querés eliminar este mensaje?")) return;
-
-    try {
-      const respuesta = await fetch("/eliminar-mensaje" + location.search, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "X-Pareja-Key": clavePareja
-        },
-        body: JSON.stringify({ id: mensaje.id })
-      });
-
-      const datos = await respuesta.json();
-
-      if (!respuesta.ok) {
-        throw new Error(datos.error || "No se pudo eliminar el mensaje");
+    for(const mensaje of datos.mensajes){
+      const tarjeta=document.createElement("div");tarjeta.className="msg-card";
+      const nombre=document.createElement("strong");nombre.textContent=mensaje.nombre;
+      const texto=document.createElement("p");texto.textContent=mensaje.texto;
+      tarjeta.append(nombre,texto);
+      if(clavePareja){
+        const botonEliminar=document.createElement("button");
+        botonEliminar.textContent="✕ Eliminar";
+        botonEliminar.style.cssText="background:#d9534f;color:#fff;border:none;padding:4px 10px;border-radius:6px;font-size:11px;cursor:pointer;margin-top:6px";
+        botonEliminar.addEventListener("click",async()=>{
+          if(!confirm("¿Querés eliminar este mensaje?"))return;
+          try{
+            const r=await fetch("/eliminar-mensaje"+location.search,{method:"POST",headers:{"Content-Type":"application/json","X-Pareja-Key":clavePareja},body:JSON.stringify({id:mensaje.id})});
+            if(!r.ok)throw new Error("No se pudo eliminar");
+            await cargarMensajes();
+          }catch(e){alert(e.message)}
+        });
+        tarjeta.appendChild(botonEliminar);
       }
-
-      await cargarMensajes();
-    } catch (error) {
-      alert(error.message);
-    }
-  });
-
-  tarjeta.appendChild(botonEliminar);
-}
-tarjeta.prepend(nombre, texto);
       listaMensajes.appendChild(tarjeta);
     }
-  } catch (error) {
-    estadoMensaje.textContent = error.message;
+    emptyMensajes.style.display=datos.mensajes&&datos.mensajes.length?'none':'block';
+  }catch(error){
+    estadoMensaje.textContent=error.message;
   }
 }
 
-formularioMensajes.addEventListener("submit", async (evento) => {
-  evento.preventDefault();
-
-  const boton = formularioMensajes.querySelector("button");
-  boton.disabled = true;
-  estadoMensaje.textContent = "Enviando mensaje...";
-
-  try {
-    const respuesta = await fetch("/mensajes" + location.search, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        nombre: document.getElementById("nombreMensaje").value,
-        texto: document.getElementById("textoMensaje").value
+formularioMensajes.addEventListener("submit",async(e)=>{
+  e.preventDefault();
+  const boton=formularioMensajes.querySelector("button");
+  boton.disabled=true;
+  estadoMensaje.textContent="Enviando dedicatoria...";
+  try{
+    const respuesta=await fetch("/mensajes"+location.search,{
+      method:"POST",
+      headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({
+        nombre:document.getElementById("nombreMensaje").value,
+        texto:document.getElementById("textoMensaje").value
       })
     });
-
-    const datos = await respuesta.json();
-    if (!respuesta.ok) {
-      throw new Error(datos.error || "No se pudo enviar el mensaje");
-    }
-
+    const datos=await respuesta.json();
+    if(!respuesta.ok)throw new Error(datos.error||"No se pudo enviar el mensaje");
     formularioMensajes.reset();
-    estadoMensaje.textContent = "¡Mensaje enviado correctamente!";
+    estadoMensaje.textContent="¡Mensaje enviado con éxito! ❤️";
+    showToast("¡Mensaje compartido correctamente!");
     await cargarMensajes();
-  } catch (error) {
-    estadoMensaje.textContent = error.message;
-  } finally {
-    boton.disabled = false;
+  }catch(error){
+    estadoMensaje.textContent=error.message;
+  }finally{
+    boton.disabled=false;
   }
 });
 
 cargarMensajes();
 </script>
-<script>
-/* Barra de acceso: enlaza botones existentes sin modificar sus manejadores */
-(function(){
- const $=id=>document.getElementById(id);
- const original=$('seccionMensajes'),anchor=document.createComment('Ubicación original de mensajes');
- original.parentNode.insertBefore(anchor,original);
- const modal=$('navMessageModal'),slot=$('navMessageSlot'),more=$('navMoreMenu');
- function closeMore(){more.classList.remove('open');$('navMore').setAttribute('aria-expanded','false')}
- function openMessages(){closeMore();slot.appendChild(original);modal.classList.add('open');document.body.style.overflow='hidden';$('nombreMensaje').focus()}
- function closeMessages(){anchor.parentNode.insertBefore(original,anchor.nextSibling);modal.classList.remove('open');document.body.style.overflow=''}
- $('navUpload').onclick=iniciarSubida;
- $('navMessages').onclick=openMessages;
- $('navCloseMessages').onclick=closeMessages;
- modal.addEventListener('click',e=>{if(e.target===modal)closeMessages()});
- $('navProject').onclick=()=>{if(!images.length){alert(upload.disabled?'Para proyectar recuerdos necesitás abrir el enlace completo de un evento.':'Todavía no hay fotografías para proyectar.');return}$('project').click()};
- $('navAdmin').onclick=()=>{if(upload.disabled){window.location.href='/admin';return}$('pareja').click();$('navAdmin').textContent=$('pareja').textContent==='Salir de administración'?'⚙ Salir de administración':'⚙ Administrar'};
- $('navMore').onclick=()=>{const open=more.classList.toggle('open');$('navMore').setAttribute('aria-expanded',String(open))};
- $('navMoreProject').onclick=()=>{closeMore();$('navProject').click()};
- $('navMoreAdmin').onclick=()=>{closeMore();$('navAdmin').click()};
- document.addEventListener('keydown',e=>{if(e.key==='Escape'){if(modal.classList.contains('open'))closeMessages();closeMore()}});
- document.addEventListener('click',e=>{if(!e.target.closest('.sola-more'))closeMore()});
-})();
-</script>
+
 <script>
 /* QR local: motor MIT de Kazuhiko Arase, incluido sin servicios externos. */
 const SolaQR=(function(){const M={},cache={};
@@ -1611,7 +2565,7 @@ function solaCrearQR(){
   const n=qr.getModuleCount(),quiet=4,total=n+quiet*2;
   const svg=document.createElementNS('http://www.w3.org/2000/svg','svg');
   svg.setAttribute('viewBox',`0 0 ${total} ${total}`);
-  svg.setAttribute('role','img');svg.setAttribute('aria-label','Código QR para acceder al álbum');
+  svg.setAttribute('role','img');svg.setAttribute('aria-label','CÃ³digo QR para acceder al Ã¡lbum');
   svg.setAttribute('shape-rendering','crispEdges');
   const bg=document.createElementNS('http://www.w3.org/2000/svg','rect');
   bg.setAttribute('width',total);bg.setAttribute('height',total);bg.setAttribute('fill','#fff');svg.appendChild(bg);
