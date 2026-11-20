@@ -58,7 +58,7 @@ export async function onRequestPost({request,env}) {
  }
  if(tipo==='video/mp4'||tipo==='video/quicktime'){
   const segundos=duracionMP4(new Uint8Array(archivo));
-  if(segundos!==null&&(!Number.isFinite(segundos)||segundos<=0||segundos>30.5))return error('El video debe durar como máximo 30 segundos',422);
+  if(segundos!==null&&(!Number.isFinite(segundos)||segundos<=0||segundos>60.5))return error('El video debe durar como máximo 60 segundos (1 minuto)',422);
  }
  const nombre=`${crypto.randomUUID()}.${ext}`;
  await bucket.put(`eventos/${evento.id}/videos/${nombre}`,archivo,{httpMetadata:{contentType:tipo==='video/quicktime'?'video/mp4':tipo}});
