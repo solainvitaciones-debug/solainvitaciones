@@ -28,9 +28,19 @@
     <p>SOLA · INVITACIONES</p>
     <h1>Administración de álbumes</h1>
     <div class="panel">
-      <h2>Crear nuevo álbum</h2>
-      <label for="adminKey">Clave de administración</label>
-      <input id="adminKey" type="password" autocomplete="off" placeholder="Clave configurada en Cloudflare">
+      <h2>1. Clave de administración</h2>
+      <label for="adminKey">Ingresá tu clave para crear o gestionar tus álbumes</label>
+      <div style="display:flex;gap:8px;align-items:center;margin-top:7px">
+        <input id="adminKey" type="password" autocomplete="off" placeholder="Clave configurada en Cloudflare" style="margin-top:0;flex:1">
+        <button type="button" id="toggleClave" style="margin-top:0;padding:12px 14px;background:#e8e4df;font-size:13px;white-space:nowrap">👁️ Ver clave</button>
+      </div>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:14px">
+        <button type="button" id="ingresarVer" style="margin-top:0;background:#3B3E32;color:#fff;font-weight:bold">Ingresar y ver mis álbumes</button>
+      </div>
+      <p id="estadoLogin" role="status" aria-live="polite" style="margin-top:10px;font-weight:bold"></p>
+    </div>
+    <div class="panel">
+      <h2>2. Crear nuevo álbum</h2>
       <label for="nombre">Nombre del evento</label>
       <input id="nombre" placeholder="Ej.: Lucía & Martín">
       <label for="fecha">Fecha del evento</label>
@@ -38,10 +48,10 @@
       <button type="button" id="crearAlbum">Crear álbum</button>
       <p id="resultado" role="status" aria-live="polite"></p>
     </div>
-    <div class="panel">
-      <h2>Mis álbumes</h2>
+    <div class="panel" id="panelListado">
+      <h2>3. Mis álbumes</h2>
       <p class="muted">Consultá los álbumes que ya creaste y recuperá sus enlaces y códigos QR.</p>
-      <button type="button" id="verAlbumes">Ver mis álbumes</button>
+      <button type="button" id="verAlbumes">Actualizar lista de álbumes</button>
       <p id="estadoListado" role="status" aria-live="polite"></p>
       <div id="listaAlbumes"></div>
     </div>
@@ -51,10 +61,29 @@
 <script>
   const resultado = document.getElementById("resultado");
   const estadoListado = document.getElementById("estadoListado");
+  const estadoLogin = document.getElementById("estadoLogin");
   const listaAlbumes = document.getElementById("listaAlbumes");
   const botonListar = document.getElementById("verAlbumes");
+  const botonIngresar = document.getElementById("ingresarVer");
+  const inputClave = document.getElementById("adminKey");
+  const btnToggleClave = document.getElementById("toggleClave");
+
   document.getElementById("crearAlbum").addEventListener("click", crearAlbum);
   botonListar.addEventListener("click", listarAlbumes);
+  botonIngresar.addEventListener("click", listarAlbumes);
+
+  btnToggleClave.addEventListener("click", () => {
+    const esPass = inputClave.type === "password";
+    inputClave.type = esPass ? "text" : "password";
+    btnToggleClave.textContent = esPass ? "🙈 Ocultar" : "👁️ Ver clave";
+  });
+
+  inputClave.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      listarAlbumes();
+    }
+  });
 
   async function crearAlbum() {
     const adminKey = document.getElementById("adminKey").value.trim();
@@ -129,11 +158,16 @@
     const adminKey = document.getElementById("adminKey").value.trim();
     if (!adminKey) {
       estadoListado.textContent = "Ingresá primero tu clave de administración en el campo de arriba.";
+      estadoLogin.style.color = "#b94a48";
+      estadoLogin.textContent = "Escribí tu clave de administración primero.";
       return;
     }
     botonListar.disabled = true;
+    botonIngresar.disabled = true;
     listaAlbumes.replaceChildren();
     estadoListado.textContent = "Consultando álbumes...";
+    estadoLogin.style.color = "#4B4B4D";
+    estadoLogin.textContent = "Verificando clave y cargando álbumes...";
     try {
       const respuesta = await fetch("/admin/listar-albumes", {
         method: "GET",
@@ -142,7 +176,10 @@
       });
       const datos = await respuesta.json();
       if (!respuesta.ok) {
-        estadoListado.textContent = datos.error || "No se pudieron consultar los álbumes.";
+        const msgError = datos.error || "No se pudieron consultar los álbumes.";
+        estadoListado.textContent = msgError;
+        estadoLogin.style.color = "#b94a48";
+        estadoLogin.textContent = "❌ " + msgError + " (verificá la clave con el botón 'Ver clave').";
         return;
       }
       if (!Array.isArray(datos.albumes)) {
@@ -150,6 +187,8 @@
         return;
       }
       estadoListado.textContent = `${datos.albumes.length} álbum(es) encontrado(s).`;
+      estadoLogin.style.color = "#2e6b34";
+      estadoLogin.textContent = `✅ Clave correcta — ${datos.albumes.length} álbum(es) cargado(s) abajo.`;
       for (const album of datos.albumes) {
         const item = document.createElement("div");
         item.className = "album";
@@ -256,8 +295,11 @@
       }
     } catch (e) {
       estadoListado.textContent = "No se pudo conectar con el servidor.";
+      estadoLogin.style.color = "#b94a48";
+      estadoLogin.textContent = "No se pudo conectar con el servidor.";
     } finally {
       botonListar.disabled = false;
+      botonIngresar.disabled = false;
     }
   }
 </script>
