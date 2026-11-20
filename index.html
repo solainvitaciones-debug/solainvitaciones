@@ -218,6 +218,7 @@ body{
   columns:2 160px;
   column-gap:12px;
   margin-bottom:24px;
+  position:relative;
 }
 .photo{
   break-inside:avoid;
@@ -227,10 +228,14 @@ body{
   background:var(--sola-bg-pill);
   box-shadow:0 3px 12px rgba(0,0,0,0.04);
   position:relative;
+  min-height:210px;
   opacity:0;
   transform:translateY(38px) scale(0.94);
   transition:opacity 1.15s cubic-bezier(0.22,1,0.36,1),transform 1.15s cubic-bezier(0.22,1,0.36,1);
   will-change:opacity,transform;
+}
+.photo.cargada{
+  min-height:0;
 }
 .photo.visible{
   opacity:1;
@@ -1242,14 +1247,14 @@ if(!qs.has('evento')||!qs.has('clave')){
   setInterval(()=>{cargarFotos();cargarVideos()},10000);
 }
 
-// CARGA DE FOTOS — paginada con scroll infinito y aparición suave al scrollear
+// CARGA DE FOTOS — paginada con scroll infinito y aparición suave a medida que se scrollea
 let todasLasFotos=[];
 let fotosRenderizadas=0;
 const FOTOS_POR_PAGINA=20;
 let sentinelObserver=null;
-let photoObserver=null;
 let colaAnimacion=[];
 let animandoCola=false;
+let usuarioHaScrolleado=false;
 const PAUSA_ENTRE_FOTOS_MS=220;
 
 function procesarColaAnimacion(){
@@ -1266,40 +1271,70 @@ function procesarColaAnimacion(){
   },PAUSA_ENTRE_FOTOS_MS);
 }
 
-function intentarAnimarTarjeta(div){
-  if(div._cargada && div._enVista && !div._encolada){
-    div._encolada=true;
-    colaAnimacion.push(div);
-    procesarColaAnimacion();
+function evaluarFotosEnScroll(){
+  const tarjetas=[...gallery.querySelectorAll('.photo')];
+  if(!tarjetas.length)return;
+  const dock=document.querySelector('.fixed-bottom-dock');
+  const dockAlto=dock?dock.offsetHeight:155;
+  const limiteInferior=window.innerHeight-dockAlto-20;
+  const scrollActual=window.scrollY||document.documentElement.scrollTop||0;
+  if(scrollActual>8)usuarioHaScrolleado=true;
+  const maxScroll=Math.max(0,document.documentElement.scrollHeight-window.innerHeight);
+  const enFondo=maxScroll>0 && scrollActual>=maxScroll-20;
+  const altoGaleria=Math.max(240,gallery.offsetHeight-120);
+  const topGaleria=gallery.getBoundingClientRect().top;
+
+  const candidatas=[];
+  for(const div of tarjetas){
+    if(div._encolada || !div._cargada)continue;
+    const rect=div.getBoundingClientRect();
+    const offsetEnGaleria=Math.max(0,rect.top-topGaleria);
+    const esPrimeraFila=offsetEnGaleria<65;
+    if(esPrimeraFila){
+      candidatas.push({div,orden:offsetEnGaleria*10+rect.left});
+      continue;
+    }
+    // Las filas inferiores esperan sí o sí a que la persona scrollee hacia abajo
+    if(!usuarioHaScrolleado)continue;
+    const requeridoPorPorcentaje=maxScroll*Math.min(0.92,offsetEnGaleria/altoGaleria);
+    const scrollRequerido=Math.min(offsetEnGaleria*0.42,Math.max(12,requeridoPorPorcentaje));
+    const visibleArribaDelDock=rect.top+45<=limiteInferior;
+    if((scrollActual>=scrollRequerido && visibleArribaDelDock) || enFondo){
+      candidatas.push({div,orden:offsetEnGaleria*10+rect.left});
+    }
   }
+  candidatas.sort((a,b)=>a.orden-b.orden);
+  for(const item of candidatas){
+    item.div._encolada=true;
+    colaAnimacion.push(item.div);
+  }
+  if(candidatas.length)procesarColaAnimacion();
 }
 
-function asegurarPhotoObserver(){
-  if(photoObserver)return photoObserver;
-  photoObserver=new IntersectionObserver((entries)=>{
-    entries.forEach(entry=>{
-      if(entry.isIntersecting){
-        const div=entry.target;
-        div._enVista=true;
-        photoObserver.unobserve(div);
-        intentarAnimarTarjeta(div);
-      }
-    });
-  },{threshold:0.12,rootMargin:'0px 0px -25px 0px'});
-  return photoObserver;
-}
+window.addEventListener('scroll',()=>{
+  usuarioHaScrolleado=true;
+  requestAnimationFrame(evaluarFotosEnScroll);
+},{passive:true});
+window.addEventListener('wheel',()=>{
+  usuarioHaScrolleado=true;
+  requestAnimationFrame(evaluarFotosEnScroll);
+},{passive:true});
+window.addEventListener('touchmove',()=>{
+  usuarioHaScrolleado=true;
+  requestAnimationFrame(evaluarFotosEnScroll);
+},{passive:true});
 
 function crearTarjetaFoto(url){
   const div=document.createElement('div');div.className='photo';
   div._cargada=false;
-  div._enVista=false;
   div._encolada=false;
   const img=document.createElement('img');img.src=url;img.alt='Recuerdo compartido';img.loading='lazy';
   img.onclick=()=>show(url);
   const marcarCargada=()=>{
     if(div._cargada)return;
     div._cargada=true;
-    intentarAnimarTarjeta(div);
+    div.classList.add('cargada');
+    requestAnimationFrame(evaluarFotosEnScroll);
   };
   img.onload=marcarCargada;
   img.onerror=marcarCargada;
@@ -1310,7 +1345,6 @@ function crearTarjetaFoto(url){
     b.onclick=(e)=>{e.stopPropagation();const nombre=new URL(url,location.origin).searchParams.get('nombre');eliminarArchivo('foto',nombre)};
     div.appendChild(b);
   }
-  asegurarPhotoObserver().observe(div);
   return div;
 }
 
@@ -1324,6 +1358,7 @@ function renderizarSiguienteLote(){
   fotosRenderizadas+=lote.length;
   const hayMas=fotosRenderizadas<todasLasFotos.length;
   document.getElementById('loadingMore').style.display='none';
+  requestAnimationFrame(evaluarFotosEnScroll);
   // si ya mostramos todo, desconectar el observer
   if(!hayMas && sentinelObserver){
     sentinelObserver.disconnect();
@@ -1360,7 +1395,7 @@ async function cargarFotos(){
       images.splice(0,images.length,...nuevas); // mantiene el slideshow sincronizado
       fotosRenderizadas=0;
       colaAnimacion=[];
-      if(photoObserver){photoObserver.disconnect();photoObserver=null;}
+      usuarioHaScrolleado=(window.scrollY||0)>8;
       gallery.replaceChildren();
       renderizarSiguienteLote();
       iniciarScrollInfinito();
