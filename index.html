@@ -845,7 +845,7 @@ body{
       <span id="count"></span>
       <div id="empty"></div>
       <div id="status"></div>
-      <input id="files" type="file" accept="image/jpeg,image/png,image/webp,video/mp4" multiple>
+      <input id="files" type="file" accept="image/jpeg,image/png,image/webp,video/mp4,video/quicktime,video/webm,.mov,.mp4,.webm" multiple>
     </div>
   </main>
 
@@ -1166,6 +1166,16 @@ lightbox.onclick=e=>{if(e.target===lightbox)stop()};
 document.addEventListener('keydown',e=>{if(e.key==='Escape')stop()});
 
 // SUBIDA Y COMPRESIÓN
+function obtenerTipoVideo(archivo){
+  const t=(archivo.type||'').toLowerCase();
+  if(t==='video/mp4'||t==='video/quicktime'||t==='video/webm')return t;
+  const n=(archivo.name||'').toLowerCase();
+  if(n.endsWith('.mov'))return 'video/quicktime';
+  if(n.endsWith('.webm'))return 'video/webm';
+  if(n.endsWith('.mp4'))return 'video/mp4';
+  return '';
+}
+
 function comprobarDuracion(archivo){
   return new Promise((resolve,reject)=>{
     const video=document.createElement('video');
@@ -1174,10 +1184,35 @@ function comprobarDuracion(archivo){
     video.preload='metadata';
     video.onloadedmetadata=()=>{
       const segundos=video.duration;limpiar();
-      Number.isFinite(segundos)&&segundos>0&&segundos<=30?resolve():reject(new Error('El video debe durar como máximo 30 segundos'));
+      Number.isFinite(segundos)&&segundos>0&&segundos<=30.5?resolve():reject(new Error('El video dura más de 30 segundos. Podés recortarlo desde tu galería antes de subirlo.'));
     };
     video.onerror=()=>{limpiar();reject(new Error('No se pudo verificar la duración del video'))};
     video.src=url;
+  });
+}
+
+function subirConProgreso(url,archivo,contentType,onProgress){
+  return new Promise((resolve,reject)=>{
+    const xhr=new XMLHttpRequest();
+    xhr.open('POST',url);
+    xhr.setRequestHeader('Content-Type',contentType);
+    xhr.upload.onprogress=(e)=>{
+      if(e.lengthComputable&&onProgress){
+        const pct=Math.min(99,Math.max(1,Math.round((e.loaded/e.total)*100)));
+        onProgress(pct);
+      }
+    };
+    xhr.onload=()=>{
+      if(xhr.status>=200&&xhr.status<300){
+        resolve();
+      }else{
+        let mensaje='Error al subir';
+        try{mensaje=JSON.parse(xhr.responseText).error||mensaje}catch{}
+        reject(new Error(mensaje));
+      }
+    };
+    xhr.onerror=()=>reject(new Error('Error de conexión al subir el archivo'));
+    xhr.send(archivo);
   });
 }
 
@@ -1207,26 +1242,42 @@ input.onchange=async()=>{
   const archivos=[...input.files];
   if(!archivos.length)return;
   upload.disabled=true;btnSubir.disabled=true;
+  const textoBotonOriginal=btnSubir.querySelector('span')?.textContent||'Subir fotos y videos';
+  const spanBoton=btnSubir.querySelector('span');
   let errores=[];
+  let indice=0;
   for(const archivo of archivos){
-    const esVideo=archivo.type==='video/mp4';
-    if(esVideo?archivo.size>25*1024*1024:!['image/jpeg','image/png','image/webp'].includes(archivo.type)){
-      errores.push(archivo.name+': formato o peso no admitido');continue;
+    indice++;
+    const prefijo=archivos.length>1?`(${indice}/${archivos.length}) `:'';
+    const tipoVideo=obtenerTipoVideo(archivo);
+    const esVideo=Boolean(tipoVideo);
+    const limiteVideo=90*1024*1024;
+    if(esVideo && archivo.size>limiteVideo){
+      errores.push(archivo.name+': supera los 90 MB permitidos (recortale unos segundos desde tu galería)');
+      continue;
+    }
+    if(!esVideo && !['image/jpeg','image/png','image/webp'].includes(archivo.type)){
+      errores.push(archivo.name+': formato no compatible (usá fotos JPG/PNG o videos MP4/MOV)');
+      continue;
     }
     try{
       if(esVideo) await comprobarDuracion(archivo);
-      showToast('Subiendo '+archivo.name+'…', 5000);
+      const etiqueta=esVideo?'video':'foto';
+      showToast(`Subiendo ${etiqueta} ${prefijo}… 0%`, 15000);
+      if(spanBoton) spanBoton.textContent=`Subiendo ${prefijo}0%`;
       const preparado=esVideo?archivo:await prepararFoto(archivo);
-      const respuesta=await fetch((esVideo?'/videos':'/fotos')+parametros,{method:'POST',headers:{'Content-Type':preparado.type},body:preparado});
-      if(!respuesta.ok){
-        let mensaje='Error al subir';try{mensaje=(await respuesta.json()).error||mensaje}catch{}
-        throw new Error(mensaje);
-      }
+      const contentType=esVideo?tipoVideo:preparado.type;
+      await subirConProgreso((esVideo?'/videos':'/fotos')+parametros,preparado,contentType,(pct)=>{
+        toast.textContent=`Subiendo ${etiqueta} ${prefijo}… ${pct}%`;
+        toast.classList.add('show');
+        if(spanBoton) spanBoton.textContent=`Subiendo ${prefijo}${pct}%`;
+      });
     }catch(error){errores.push(archivo.name+': '+error.message)}
   }
+  if(spanBoton) spanBoton.textContent=textoBotonOriginal;
   input.value='';upload.disabled=false;btnSubir.disabled=false;
   await Promise.all([cargarFotos(),cargarVideos()]);
-  showToast(errores.length?errores.join(' | '):'¡Recuerdos compartidos correctamente! ✨');
+  showToast(errores.length?errores.join(' | '):'¡Recuerdos compartidos correctamente! ✨', 4200);
 };
 
 // URL PARAMS Y ARRANQUE

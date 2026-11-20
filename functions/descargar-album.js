@@ -8,7 +8,7 @@ const fail = (message, status) =>
   });
 
 const photo = /^[a-f0-9]{8}-(?:[a-f0-9]{4}-){3}[a-f0-9]{12}\.(jpg|png|webp)$/i;
-const video = /^[a-f0-9]{8}-(?:[a-f0-9]{4}-){3}[a-f0-9]{12}\.mp4$/i;
+const video = /^[a-f0-9]{8}-(?:[a-f0-9]{4}-){3}[a-f0-9]{12}\.(mp4|mov|webm)$/i;
 
 const enc = new TextEncoder();
 const u16 = (a, n) => { a.push(n & 255, (n >>> 8) & 255); };

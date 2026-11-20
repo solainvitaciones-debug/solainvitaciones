@@ -6,7 +6,7 @@ export async function onRequestGet({ request, env }) {
   if (!env.ALBUM_FOTOS) return new Response('R2 no conectado', { status: 503 });
   const url = new URL(request.url);
   const nombre = url.searchParams.get('nombre');
-  if (!/^[a-f0-9-]{36}\.mp4$/i.test(nombre || '')) return new Response('Archivo inválido', { status: 400 });
+  if (!/^[a-f0-9-]{36}\.(mp4|mov|webm)$/i.test(nombre || '')) return new Response('Archivo inválido', { status: 400 });
   const key = `eventos/${evento.id}/videos/${nombre}`;
   const metadata = await env.ALBUM_FOTOS.head(key);
   if (!metadata) return new Response('Video no encontrado', { status: 404 });
@@ -31,7 +31,7 @@ export async function onRequestGet({ request, env }) {
   const objeto = await env.ALBUM_FOTOS.get(key, { range: { offset: start, length } });
   if (!objeto?.body) return new Response('Video no encontrado', { status: 404 });
   const headers = {
-    'Content-Type': 'video/mp4',
+    'Content-Type': nombre.toLowerCase().endsWith('.webm') ? 'video/webm' : 'video/mp4',
     'Content-Length': String(length),
     'Accept-Ranges': 'bytes',
     'Cache-Control': 'private,max-age=60',

@@ -1,6 +1,6 @@
 import {buscarEvento} from './_eventos.js';
 const foto=/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\.(jpg|png|webp)$/i;
-const video=/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\.mp4$/i;
+const video=/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\.(mp4|mov|webm)$/i;
 const fail=(msg,status)=>Response.json({error:msg},{status,headers:{'Cache-Control':'no-store'}});
 export async function onRequestPost({request,env}) {
  const evento=await buscarEvento(request,env);if(!evento)return fail('Álbum no disponible',404);
