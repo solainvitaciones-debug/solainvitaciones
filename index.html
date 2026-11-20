@@ -76,7 +76,7 @@ body{
   margin-top:-38px;
   background:var(--sola-bg-surface);
   border-radius:32px 32px 0 0;
-  padding:26px 20px 20px;
+  padding:26px 20px 150px;
   text-align:center;
   flex:1;
   display:flex;
@@ -272,24 +272,53 @@ body{
   margin-bottom:10px;
 }
 
-/* PRIMARY UPLOAD BUTTON */
+/* FIXED BOTTOM DOCK (MOBILE & PC) */
+.fixed-bottom-dock{
+  position:fixed;
+  bottom:0;
+  left:0;
+  right:0;
+  width:100%;
+  background:rgba(255,255,255,0.92);
+  backdrop-filter:blur(20px);
+  -webkit-backdrop-filter:blur(20px);
+  border-top:1px solid var(--sola-border-light);
+  box-shadow:0 -6px 24px rgba(40,35,25,0.08);
+  z-index:90;
+  padding:10px 14px max(12px, env(safe-area-inset-bottom));
+  box-sizing:border-box;
+}
+
+@media(min-width:481px){
+  .fixed-bottom-dock{
+    left:50%;
+    transform:translateX(-50%);
+    max-width:480px;
+    border-radius:24px 24px 0 0;
+    border-left:1px solid var(--sola-border-light);
+    border-right:1px solid var(--sola-border-light);
+    padding:12px 18px 14px;
+    box-shadow:0 -8px 30px rgba(40,35,25,0.1);
+  }
+}
+
 .primary-upload-wrap{
-  margin-bottom:22px;
-  padding:0 4px;
+  margin-bottom:8px;
+  padding:0;
 }
 .btn-primary-upload{
   width:100%;
   display:flex;
   align-items:center;
   justify-content:center;
-  gap:12px;
+  gap:10px;
   background:var(--sola-primary-olive);
   color:var(--sola-primary-text);
   border:none;
-  padding:16px 24px;
+  padding:12px 20px;
   border-radius:999px;
   font-family:inherit;
-  font-size:16px;
+  font-size:15px;
   font-weight:600;
   cursor:pointer;
   box-shadow:var(--sola-shadow-btn);
@@ -314,10 +343,9 @@ body{
   display:flex;
   justify-content:space-around;
   align-items:flex-start;
-  gap:10px;
-  margin-top:auto;
-  padding:14px 6px 6px;
-  border-top:1px solid var(--sola-border-light);
+  gap:8px;
+  padding:4px 0 0;
+  border-top:none;
 }
 .action-circle-btn{
   background:transparent;
@@ -325,14 +353,14 @@ body{
   display:flex;
   flex-direction:column;
   align-items:center;
-  gap:8px;
+  gap:6px;
   cursor:pointer;
   flex:1;
   padding:0;
 }
 .action-circle-btn .circle-icon{
-  width:52px;
-  height:52px;
+  width:44px;
+  height:44px;
   border-radius:50%;
   background:var(--sola-bg-surface);
   border:1px solid var(--sola-border-light);
@@ -344,7 +372,7 @@ body{
   transition:all .25s cubic-bezier(0.16,1,0.3,1);
 }
 .action-circle-btn:hover .circle-icon{
-  transform:translateY(-3px) scale(1.06);
+  transform:translateY(-2px) scale(1.05);
   border-color:var(--sola-primary-olive);
   color:var(--sola-primary-olive);
 }
@@ -352,7 +380,7 @@ body{
   transform:scale(0.95);
 }
 .action-circle-btn span{
-  font-size:11px;
+  font-size:10.5px;
   font-weight:500;
   color:var(--sola-text-muted);
   text-align:center;
@@ -747,19 +775,6 @@ body{
       </div>
     </div>
 
-    <!-- PRIMARY UPLOAD BUTTON -->
-    <div class="primary-upload-wrap">
-      <button type="button" id="btnSubir" class="btn-primary-upload">
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z"/>
-          <path d="M12 12v6"/>
-          <path d="m15 15-3-3-3 3"/>
-        </svg>
-        <span>Subir fotos y videos</span>
-      </button>
-      <input id="files" type="file" accept="image/jpeg,image/png,image/webp,video/mp4" multiple style="display:none">
-    </div>
-
     <!-- INCOMPLETE URL WARNING (IF ACCESSED DIRECTLY) -->
     <div id="avisoIncompleto" style="display:none;background:var(--sola-bg-subtle);border-radius:18px;padding:16px;margin-bottom:18px;font-size:13px;line-height:1.5;">
       <strong>⚠️ Enlace de evento incompleto</strong><br>
@@ -770,33 +785,13 @@ body{
       </div>
     </div>
 
-    <!-- BOTTOM ACTION BAR (4 CIRCLES) -->
-    <div class="bottom-action-bar">
-      <button type="button" id="btnProyeccion" class="action-circle-btn">
-        <div class="circle-icon">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="14" x="2" y="3" rx="2"/><line x1="8" x2="16" y1="21" y2="21"/><line x1="12" x2="12" y1="17" y2="21"/></svg>
-        </div>
-        <span>Proyección</span>
-      </button>
-      <button type="button" id="btnDescargar" class="action-circle-btn">
-        <div class="circle-icon">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></svg>
-        </div>
-        <span>Descargar todo</span>
-      </button>
-      <button type="button" id="btnCopiarEnlace" class="action-circle-btn">
-        <div class="circle-icon">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
-        </div>
-        <span>Copiar enlace</span>
-      </button>
-      <button type="button" id="btnModalQR" class="action-circle-btn">
-        <div class="circle-icon">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect width="5" height="5" x="3" y="3" rx="1"/><rect width="5" height="5" x="16" y="3" rx="1"/><rect width="5" height="5" x="3" y="16" rx="1"/><path d="M21 16h-3a2 2 0 0 0-2 2v3"/><path d="M21 21v.01"/><path d="M12 7v3a2 2 0 0 1-2 2H7"/><path d="M3 12h.01"/><path d="M12 3h.01"/><path d="M12 16v.01"/><path d="M16 12h1"/><path d="M21 12v.01"/><path d="M12 21v-1"/></svg>
-        </div>
-        <span>Código QR</span>
-      </button>
-    </div>
+    <!-- FOOTER WITH SIGNATURE -->
+    <footer class="sola-footer">
+      <div style="margin-bottom:10px">
+        <img src="assets/logo-sola-completo.png" alt="Sola Invitaciones Digitales" style="height:24px;opacity:0.75;filter:drop-shadow(0 1px 2px rgba(0,0,0,0.04));display:inline-block">
+      </div>
+      <button type="button" id="pareja" class="btn-admin-link">⚙ Administrar mi álbum</button>
+    </footer>
 
     <!-- HIDDEN BACKWARDS-COMPATIBILITY HOOKS -->
     <div style="display:none">
@@ -806,14 +801,50 @@ body{
       <span id="count"></span>
       <div id="empty"></div>
       <div id="status"></div>
+      <input id="files" type="file" accept="image/jpeg,image/png,image/webp,video/mp4" multiple>
+    </div>
+  </main>
+
+  <!-- BOTONERA INFERIOR FIJA (MÓVIL Y PC) -->
+  <aside class="fixed-bottom-dock" aria-label="Botonera del álbum">
+    <div class="primary-upload-wrap">
+      <button type="button" id="btnSubir" class="btn-primary-upload">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z"/>
+          <path d="M12 12v6"/>
+          <path d="m15 15-3-3-3 3"/>
+        </svg>
+        <span>Subir fotos y videos</span>
+      </button>
     </div>
 
-    <footer class="sola-footer">
-      <div style="margin-bottom:10px">
-        <img src="assets/logo-sola-completo.png" alt="Sola Invitaciones Digitales" style="height:24px;opacity:0.75;filter:drop-shadow(0 1px 2px rgba(0,0,0,0.04));display:inline-block">
-      </div>
-      <button type="button" id="pareja" class="btn-admin-link">⚙ Administrar mi álbum</button>
-    </footer>
+    <div class="bottom-action-bar">
+      <button type="button" id="btnProyeccion" class="action-circle-btn">
+        <div class="circle-icon">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="14" x="2" y="3" rx="2"/><line x1="8" x2="16" y1="21" y2="21"/><line x1="12" x2="12" y1="17" y2="21"/></svg>
+        </div>
+        <span>Proyección</span>
+      </button>
+      <button type="button" id="btnDescargar" class="action-circle-btn">
+        <div class="circle-icon">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></svg>
+        </div>
+        <span>Descargar todo</span>
+      </button>
+      <button type="button" id="btnCopiarEnlace" class="action-circle-btn">
+        <div class="circle-icon">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+        </div>
+        <span>Copiar enlace</span>
+      </button>
+      <button type="button" id="btnModalQR" class="action-circle-btn">
+        <div class="circle-icon">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect width="5" height="5" x="3" y="3" rx="1"/><rect width="5" height="5" x="16" y="3" rx="1"/><rect width="5" height="5" x="3" y="16" rx="1"/><path d="M21 16h-3a2 2 0 0 0-2 2v3"/><path d="M21 21v.01"/><path d="M12 7v3a2 2 0 0 1-2 2H7"/><path d="M3 12h.01"/><path d="M12 3h.01"/><path d="M12 16v.01"/><path d="M16 12h1"/><path d="M21 12v.01"/><path d="M12 21v-1"/></svg>
+        </div>
+        <span>Código QR</span>
+      </button>
+    </div>
+  </aside>
   </main>
 
 </div>
