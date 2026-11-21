@@ -726,17 +726,26 @@ body{
 .lightbox-nav.prev{left:14px}
 .lightbox-nav.next{right:14px}
 .lightbox.sola-projecting{
-  --sola-qr-width:clamp(105px, min(11vw, 22vh), 190px);
-  --sola-qr-gap:clamp(12px, 2vw, 30px);
-  padding:16px;
-  padding-right:calc(var(--sola-qr-width) + var(--sola-qr-gap) + 16px);
+  --sola-qr-width:clamp(110px, min(12vw, 22vh), 185px);
+  --sola-qr-gap:clamp(14px, 2vw, 28px);
+  padding:24px calc(var(--sola-qr-width) + var(--sola-qr-gap) + 24px) 110px 24px;
+}
+.lightbox.sola-projecting img{
+  width:100%;
+  height:100%;
+  max-width:100%;
+  max-height:84vh;
+  object-fit:contain;
+  border-radius:14px;
 }
 .lightbox.sola-projecting #descargarFoto,
 .lightbox.sola-projecting .lightbox-nav,
 .lightbox.sola-projecting .lightbox-counter{display:none!important}
 .sola-projection-side{display:none}
 .lightbox.sola-projecting .sola-projection-side{
-  display:block;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
   position:absolute;
   right:20px;
   bottom:20px;
@@ -744,10 +753,50 @@ body{
   text-align:center;
   color:#fff;
   font-size:13px;
+  z-index:3;
 }
-.sola-projection-side strong{display:block;margin-bottom:8px;font-weight:normal}
-#solaProjectionQR{width:100%;background:#fff;border-radius:6px;overflow:hidden;padding:6px}
+.sola-projection-side strong{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:2px;
+  margin-bottom:8px;
+  font-weight:500;
+  line-height:1.25;
+}
+.sola-projection-side strong span{
+  display:block;
+  white-space:nowrap;
+  font-size:12.5px;
+}
+#solaProjectionQR{width:100%;background:#fff;border-radius:10px;overflow:hidden;padding:6px}
 #solaProjectionQR svg{display:block;width:100%;height:auto}
+@media (max-width: 768px), (orientation: portrait){
+  .lightbox.sola-projecting{
+    --sola-qr-width:104px;
+    padding:58px 14px 185px 14px;
+  }
+  .lightbox.sola-projecting img{
+    width:100%;
+    height:100%;
+    max-width:100%;
+    max-height:calc(100vh - 245px);
+    object-fit:contain;
+  }
+  .lightbox.sola-projecting .sola-projection-side{
+    right:16px;
+    bottom:16px;
+  }
+  .sola-projection-side strong span{
+    font-size:11.5px;
+  }
+  .sola-projection-msg{
+    left:16px!important;
+    bottom:16px!important;
+    right:134px!important;
+    padding:12px 15px!important;
+  }
+}
 .sola-projection-msg{
   display:none;
   position:absolute;
@@ -1076,7 +1125,7 @@ body{
     <p class="msg-author" id="proyeccionMensajeAutor"></p>
   </div>
   <aside class="sola-projection-side" aria-label="Acceso por QR">
-    <strong><span>Escaneá el QR</span><span>¡Compartí tus fotos!</span></strong>
+    <strong><span>Escaneá el QR!</span><span>Compartí tus fotos!</span></strong>
     <div id="solaProjectionQR"></div>
   </aside>
 </div>
