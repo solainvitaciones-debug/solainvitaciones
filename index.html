@@ -980,7 +980,7 @@ body{
     <!-- FOOTER WITH SIGNATURE -->
     <footer class="sola-footer">
       <div style="margin-bottom:4px">
-        <img src="assets/logo-sola-completo.png" alt="Sola Invitaciones Digitales" style="height:24px;opacity:0.75;filter:drop-shadow(0 1px 2px rgba(0,0,0,0.04));display:inline-block">
+        <img src="assets/logo-sola-pie.png" alt="Sola Invitaciones" style="width:90px;height:auto;opacity:0.85;filter:drop-shadow(0 1px 2px rgba(0,0,0,0.04));display:inline-block">
       </div>
     </footer>
 
@@ -1387,10 +1387,10 @@ document.getElementById('btnDescargarTarjetaQR').onclick=async()=>{
     try{
       const logoImg=document.querySelector('.sola-footer img');
       if(logoImg&&logoImg.complete&&logoImg.naturalWidth>0){
-        const h=54;
+        const h=110;
         const w=(logoImg.naturalWidth/logoImg.naturalHeight)*h;
-        ctx.globalAlpha=0.75;
-        ctx.drawImage(logoImg,600-w/2,1435,w,h);
+        ctx.globalAlpha=0.82;
+        ctx.drawImage(logoImg,600-w/2,1395,w,h);
         ctx.globalAlpha=1;
       }else{
         ctx.fillStyle='#A4A099';
