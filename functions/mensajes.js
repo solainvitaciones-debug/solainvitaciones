@@ -5,6 +5,27 @@ const MAX_MENSAJES = 500;
 const MAX_NOMBRE = 80;
 const MAX_TEXTO = 1000;
 
+const PATRONES_OFENSIVOS = [
+  /\b(put[oa]s?|mierd[oa]s?|pelotud[oa]s?|bolud[oa]s?|conchud[oa]s?|concha|pijas?|vergas?|porongas?|chot[oa]s?|culiad[oa]s?|culiaos?|forr[oa]s?|trol[oa]s?|pajer[oa]s?|pajas?|cogid[oa]s?|chupapij[oa]s?|chupaverg[oa]s?|ojete|ortiv[oa]s?|prostitut[oa]s?|porno|pornografia|fuck|bitch|dick|pussy|asshole|cunt)\b/i,
+  /🖕|🍆\s*💦|🍑\s*🍆/
+];
+
+function contieneContenidoInapropiado(cadena) {
+  if (!cadena) return false;
+  if (PATRONES_OFENSIVOS[1].test(cadena)) return true;
+  const normalizado = cadena
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[@4]/g, "a")
+    .replace(/[3]/g, "e")
+    .replace(/[1!]/g, "i")
+    .replace(/[0]/g, "o")
+    .replace(/(.)\1{2,}/g, "$1")
+    .replace(/[^a-z0-9\s]/g, " ");
+  return PATRONES_OFENSIVOS[0].test(normalizado);
+}
+
 export async function onRequestGet({ request, env }) {
   if (!env.ALBUM_FOTOS) {
     return Response.json({ error: "Almacenamiento no disponible" }, { status: 503 });
@@ -77,6 +98,13 @@ export async function onRequestPost({ request, env }) {
   if (!nombre || nombre.length > MAX_NOMBRE ||
       !texto || texto.length > MAX_TEXTO) {
     return Response.json({ error: "Revisá el nombre y el mensaje" }, { status: 400 });
+  }
+
+  if (contieneContenidoInapropiado(nombre) || contieneContenidoInapropiado(texto)) {
+    return Response.json(
+      { error: "El mensaje contiene palabras o símbolos no permitidos en el álbum del evento." },
+      { status: 422 }
+    );
   }
 
   const prefix = `mensajes/${evento.id}/`;

@@ -1525,7 +1525,92 @@ document.addEventListener('keydown',e=>{
   else if(e.key==='ArrowRight')cambiarFotoVisor(1);
 });
 
-// SUBIDA Y COMPRESIÓN
+// SUBIDA, FILTRO IA DE SEGURIDAD Y COMPRESIÓN
+let promesaModeloIA=null;
+function cargarScriptExterno(src){
+  return new Promise((resolve,reject)=>{
+    const s=document.createElement('script');
+    s.src=src;s.async=true;
+    s.onload=resolve;
+    s.onerror=()=>reject(new Error('No disponible'));
+    document.head.appendChild(s);
+  });
+}
+
+async function obtenerModeloIA(){
+  if(promesaModeloIA)return promesaModeloIA;
+  promesaModeloIA=(async()=>{
+    const timeout=new Promise((_,rej)=>setTimeout(()=>rej(new Error('Timeout IA')),4500));
+    const carga=(async()=>{
+      if(!window.tf) await cargarScriptExterno('https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@3.21.0/dist/tf.min.js');
+      if(!window.nsfwjs) await cargarScriptExterno('https://cdn.jsdelivr.net/npm/nsfwjs@2.4.2/dist/nsfwjs.min.js');
+      return await window.nsfwjs.load();
+    })();
+    return await Promise.race([carga,timeout]);
+  })().catch(()=>{promesaModeloIA=null;return null});
+  return promesaModeloIA;
+}
+
+function esClasificacionExplicita(predicciones){
+  if(!Array.isArray(predicciones))return false;
+  let porn=0,hentai=0;
+  for(const p of predicciones){
+    if(p.className==='Porn') porn=p.probability||0;
+    if(p.className==='Hentai') hentai=p.probability||0;
+  }
+  return porn>=0.70 || hentai>=0.70 || (porn+hentai)>=0.75;
+}
+
+async function verificarContenidoVisualIA(archivo, esVideo){
+  const modelo=await obtenerModeloIA();
+  if(!modelo)return;
+  const canvas=document.createElement('canvas');
+  canvas.width=224;canvas.height=224;
+  const ctx=canvas.getContext('2d');
+  if(!ctx)return;
+
+  if(!esVideo){
+    let bmp;
+    try{bmp=await createImageBitmap(archivo)}catch{return}
+    try{
+      ctx.drawImage(bmp,0,0,224,224);
+      const pred=await modelo.classify(canvas);
+      if(esClasificacionExplicita(pred)){
+        throw new Error('Bloqueada por el filtro automático de seguridad del evento (contenido inapropiado).');
+      }
+    }finally{bmp.close?.()}
+    return;
+  }
+
+  // Para videos: analizar 3 fotogramas (inicio, medio y final)
+  const url=URL.createObjectURL(archivo);
+  const video=document.createElement('video');
+  video.muted=true;video.playsInline=true;video.preload='auto';
+  try{
+    await new Promise((res,rej)=>{
+      video.onloadeddata=res;
+      video.onerror=rej;
+      video.src=url;
+    });
+    const dur=Number.isFinite(video.duration)&&video.duration>0?video.duration:3;
+    for(const fraccion of [0.2, 0.5, 0.8]){
+      await new Promise((res)=>{
+        const t=Math.min(dur-0.1,Math.max(0.1,dur*fraccion));
+        video.onseeked=res;
+        video.currentTime=t;
+        setTimeout(res,600);
+      });
+      ctx.drawImage(video,0,0,224,224);
+      const pred=await modelo.classify(canvas);
+      if(esClasificacionExplicita(pred)){
+        throw new Error('Bloqueado por el filtro automático de seguridad del evento (contenido inapropiado).');
+      }
+    }
+  }finally{
+    video.removeAttribute('src');video.load();URL.revokeObjectURL(url);
+  }
+}
+
 function obtenerTipoVideo(archivo){
   const t=(archivo.type||'').toLowerCase();
   if(t==='video/mp4'||t==='video/quicktime'||t==='video/webm')return t;
@@ -1622,6 +1707,8 @@ async function procesarSubidaArchivos(archivos){
     try{
       if(esVideo) await comprobarDuracion(archivo);
       const etiqueta=esVideo?'video':'foto';
+      showToast(`Verificando y preparando ${etiqueta} ${prefijo}…`, 8000);
+      await verificarContenidoVisualIA(archivo, esVideo);
       showToast(`Subiendo ${etiqueta} ${prefijo}… 0%`, 15000);
       if(spanBoton) spanBoton.textContent=`Subiendo ${prefijo}0%`;
       const preparado=esVideo?archivo:await prepararFoto(archivo);
@@ -1896,8 +1983,26 @@ async function cargarMensajes(){
   }
 }
 
+const PATRONES_TEXTO_OFENSIVO=[
+  /\b(put[oa]s?|mierd[oa]s?|pelotud[oa]s?|bolud[oa]s?|conchud[oa]s?|concha|pijas?|vergas?|porongas?|chot[oa]s?|culiad[oa]s?|culiaos?|forr[oa]s?|trol[oa]s?|pajer[oa]s?|pajas?|cogid[oa]s?|chupapij[oa]s?|chupaverg[oa]s?|ojete|ortiv[oa]s?|prostitut[oa]s?|porno|pornografia|fuck|bitch|dick|pussy|asshole|cunt)\b/i,
+  /🖕|🍆\s*💦|🍑\s*🍆/
+];
+function textoTieneInsultos(cadena){
+  if(!cadena)return false;
+  if(PATRONES_TEXTO_OFENSIVO[1].test(cadena))return true;
+  const norm=cadena.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[@4]/g,'a').replace(/[3]/g,'e').replace(/[1!]/g,'i').replace(/[0]/g,'o').replace(/(.)\1{2,}/g,'$1').replace(/[^a-z0-9\s]/g,' ');
+  return PATRONES_TEXTO_OFENSIVO[0].test(norm);
+}
+
 formularioMensajes.addEventListener("submit",async(e)=>{
   e.preventDefault();
+  const nombreVal=document.getElementById("nombreMensaje").value;
+  const textoVal=document.getElementById("textoMensaje").value;
+  if(textoTieneInsultos(nombreVal)||textoTieneInsultos(textoVal)){
+    estadoMensaje.textContent="Tu mensaje contiene palabras o símbolos no permitidos en el álbum del evento.";
+    showToast("El mensaje activó el filtro de seguridad del evento.");
+    return;
+  }
   const boton=formularioMensajes.querySelector("button");
   boton.disabled=true;
   estadoMensaje.textContent="Enviando dedicatoria...";
