@@ -527,7 +527,7 @@ body{
   white-space:pre-wrap;
 }
 
-/* FOOTER & ADMIN */
+/* FOOTER & HOST ADMIN BUTTON */
 .sola-footer{
   margin-top:20px;
   display:flex;
@@ -536,17 +536,46 @@ body{
   gap:6px;
   font-size:12px;
 }
-.btn-admin-link{
-  background:none;
-  border:none;
-  color:var(--sola-text-light);
+.host-admin-btn{
+  position:absolute;
+  top:16px;
+  right:16px;
+  min-width:34px;
+  height:34px;
+  border-radius:999px;
+  background:var(--sola-bg-subtle);
+  border:1px solid var(--sola-border-light);
+  color:var(--sola-text-muted);
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  gap:6px;
+  padding:0 9px;
+  font-family:inherit;
+  font-size:11.5px;
+  font-weight:600;
   cursor:pointer;
-  font-size:12px;
-  text-decoration:underline;
-  padding:6px;
-  transition:color .2s;
+  transition:all .22s cubic-bezier(0.16,1,0.3,1);
+  z-index:5;
 }
-.btn-admin-link:hover{color:var(--sola-text-main)}
+.host-admin-btn:hover{
+  color:var(--sola-primary-olive);
+  border-color:var(--sola-accent-sand);
+  background:var(--sola-bg-pill);
+  transform:scale(1.04);
+}
+.host-admin-btn.active{
+  background:var(--sola-primary-olive);
+  border-color:var(--sola-primary-olive);
+  color:#fff;
+  padding:0 12px;
+  box-shadow:0 4px 12px rgba(59,62,50,0.2);
+}
+.host-admin-btn svg{
+  width:15px;
+  height:15px;
+  flex-shrink:0;
+}
 
 /* TOAST STATUS NOTIFICATIONS */
 .toast-msg{
@@ -878,6 +907,10 @@ body{
 
   <!-- CONTENT CARD -->
   <main class="content-card">
+    <button type="button" id="pareja" class="host-admin-btn" title="Administrar este álbum (Anfitriones)" aria-label="Administrar este álbum">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+      <span id="parejaLabel" style="display:none">Salir</span>
+    </button>
     <h1 id="eventoNombre" class="event-title">Cumple 15 Emma</h1>
     <p id="eventoFecha" class="event-date">22 de noviembre de 2026</p>
     
@@ -959,11 +992,8 @@ body{
 
     <!-- FOOTER WITH SIGNATURE -->
     <footer class="sola-footer">
-      <div style="margin-bottom:10px">
+      <div style="margin-bottom:4px">
         <img src="assets/logo-sola-completo.png" alt="Sola Invitaciones Digitales" style="height:24px;opacity:0.75;filter:drop-shadow(0 1px 2px rgba(0,0,0,0.04));display:inline-block">
-      </div>
-      <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap">
-        <button type="button" id="pareja" class="btn-admin-link">⚙ Administrar este álbum</button>
       </div>
     </footer>
 
@@ -1390,9 +1420,12 @@ document.getElementById('btnDescargarTarjetaQR').onclick=async()=>{
 
 // ADMINISTRACIÓN DE LA PAREJA
 document.getElementById('pareja').onclick=()=>{
+  const btnPareja=document.getElementById('pareja');
+  const lblPareja=document.getElementById('parejaLabel');
   if(clavePareja){
     clavePareja='';
-    document.getElementById('pareja').textContent='⚙ Administrar mi álbum';
+    btnPareja.classList.remove('active');
+    if(lblPareja) lblPareja.style.display='none';
     showToast('Modo administración desactivado');
     cargarFotos();cargarVideos();cargarMensajes();
     return;
@@ -1404,8 +1437,9 @@ document.getElementById('pareja').onclick=()=>{
     return;
   }
   clavePareja=clave.trim();
-  document.getElementById('pareja').textContent='Salir de administración';
-  showToast('¡Modo administración activado!');
+  btnPareja.classList.add('active');
+  if(lblPareja) lblPareja.style.display='inline';
+  showToast('¡Modo anfitrión activado! Ya podés moderar o descargar el álbum.');
   cargarFotos();cargarVideos();cargarMensajes();
 };
 
