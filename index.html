@@ -1386,7 +1386,7 @@ document.getElementById('pareja').onclick=()=>{
     cargarFotos();cargarVideos();cargarMensajes();
     return;
   }
-  const clave=prompt('Ingresá la clave privada del organizador (novios/anfitriones):');
+  const clave=prompt('Ingresá tu clave privada de anfitrión/a:');
   if(!clave) return;
   if(!/^[a-f0-9]{48}$/i.test(clave.trim())){
     alert('La clave privada no tiene el formato correcto');
@@ -1402,7 +1402,7 @@ document.getElementById('pareja').onclick=()=>{
 // DESCARGAR TODO
 btnDescargar.onclick=()=>{
   if(!clavePareja){
-    if(confirm('La descarga completa del álbum en ZIP está reservada para los anfitriones.\n\n¿Querés ingresar tu clave privada de novios para descargar?')){
+    if(confirm('La descarga del álbum completo en .ZIP está reservada para los anfitriones (para guardar una foto individual, tocala en la galería y elegí "Descargar foto").\n\n¿Sos anfitrión/a y querés ingresar tu clave privada?')){
       document.getElementById('pareja').click();
     }
     return;
