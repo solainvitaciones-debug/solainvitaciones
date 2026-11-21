@@ -1101,12 +1101,12 @@ body{
 <div id="modalQR" class="sola-modal" role="dialog" aria-modal="true" aria-label="Código QR del álbum">
   <div class="modal-box">
     <button type="button" class="modal-close-btn" id="closeModalQR" aria-label="Cerrar">✕</button>
-    <h3 style="margin:0 0 6px;font-size:18px;">Escaneá y compartí</h3>
-    <p style="margin:0 0 16px;font-size:13px;color:var(--sola-text-muted);">Tus invitados pueden escanear este código para subir sus fotos y videos al instante.</p>
+    <h3 style="margin:0 0 6px;font-size:18px;">Compartí este álbum</h3>
+    <p style="margin:0 0 16px;font-size:13px;color:var(--sola-text-muted);line-height:1.45;">Mostrá este código en tu pantalla para que otras personas del evento lo escaneen y sumen sus fotos y videos.</p>
     <div id="modalQRSlot" class="qr-container"></div>
     <div style="display:flex;flex-direction:column;gap:8px">
-      <button type="button" id="btnDescargarTarjetaQR" class="btn-send-msg" style="width:100%">Descargar tarjeta para imprimir (PNG)</button>
-      <button type="button" id="btnDescargarModalQR" style="width:100%;background:var(--sola-bg-subtle);color:var(--sola-text-main);border:1px solid var(--sola-border-light);padding:10px 18px;border-radius:999px;font-family:inherit;font-size:13px;font-weight:600;cursor:pointer">Descargar solo código QR (PNG)</button>
+      <button type="button" id="btnCompartirDesdeQR" class="btn-send-msg" style="width:100%">📲 Compartir enlace del álbum</button>
+      <button type="button" id="btnDescargarModalQR" style="display:none;width:100%;background:var(--sola-bg-subtle);color:var(--sola-text-main);border:1px solid var(--sola-border-light);padding:10px 18px;border-radius:999px;font-family:inherit;font-size:12.5px;font-weight:600;cursor:pointer">Descargar código QR (PNG)</button>
     </div>
   </div>
 </div>
@@ -1350,7 +1350,25 @@ function renderQRModal(){
   }catch(e){
     slot.innerHTML='<p style="font-size:12px;color:#999">QR disponible al conectarse al evento</p>';
   }
+  const btnDescQR=document.getElementById('btnDescargarModalQR');
+  if(btnDescQR) btnDescQR.style.display=clavePareja?'block':'none';
 }
+
+document.getElementById('btnCompartirDesdeQR').onclick=async()=>{
+  const titulo=(document.getElementById('eventoNombre')?.textContent||'Álbum compartido').trim();
+  if(navigator.share){
+    try{
+      await navigator.share({title:titulo+' · Álbum compartido',text:'Sumá tus fotos y videos al álbum de '+titulo+':',url:window.location.href});
+      return;
+    }catch(e){if(e.name==='AbortError')return;}
+  }
+  try{
+    await navigator.clipboard.writeText(window.location.href);
+    showToast('¡Enlace del álbum copiado! 📋');
+  }catch(e){
+    prompt('Copiá el enlace de este álbum:',window.location.href);
+  }
+};
 
 document.getElementById('btnDescargarModalQR').onclick=()=>{
   showToast('Descargando código QR en PNG…');
@@ -1362,95 +1380,6 @@ document.getElementById('btnDescargarModalQR').onclick=()=>{
     descargarCanvasPNG(canvas,'QR-Album-Sola.png');
   }catch(e){
     alert('No se pudo generar la imagen PNG del QR');
-  }
-};
-
-document.getElementById('btnDescargarTarjetaQR').onclick=async()=>{
-  showToast('Preparando tarjeta lista para imprimir…');
-  try{
-    const canvas=document.createElement('canvas');
-    canvas.width=1200;canvas.height=1600;
-    const ctx=canvas.getContext('2d');
-    // Fondo crema Sola
-    ctx.fillStyle='#FAF8F5';
-    ctx.fillRect(0,0,1200,1600);
-    // Marco interior elegante
-    ctx.strokeStyle='#DED7CC';
-    ctx.lineWidth=3;
-    ctx.strokeRect(56,56,1088,1488);
-    ctx.strokeStyle='#EBE5DC';
-    ctx.lineWidth=1.5;
-    ctx.strokeRect(72,72,1056,1456);
-
-    const titulo=(document.getElementById('eventoNombre')?.textContent||'Álbum Compartido').trim();
-    const fecha=(document.getElementById('eventoFecha')?.textContent||'').trim();
-
-    ctx.textAlign='center';
-    ctx.fillStyle='#7A7670';
-    ctx.font='600 26px "Plus Jakarta Sans", sans-serif';
-    ctx.fillText('Á L B U M   C O M P A R T I D O',600,190);
-
-    ctx.fillStyle='#252525';
-    ctx.font='700 64px "Plus Jakarta Sans", sans-serif';
-    ctx.fillText(titulo.slice(0,32),600,290);
-
-    if(fecha){
-      ctx.fillStyle='#7A7670';
-      ctx.font='400 32px "Plus Jakarta Sans", sans-serif';
-      ctx.fillText(fecha,600,350);
-    }
-
-    // Divisor corazón
-    ctx.strokeStyle='#D8D0C5';
-    ctx.lineWidth=2;
-    ctx.beginPath();ctx.moveTo(430,405);ctx.lineTo(560,405);ctx.stroke();
-    ctx.beginPath();ctx.moveTo(640,405);ctx.lineTo(770,405);ctx.stroke();
-    ctx.fillStyle='#9C8E7E';
-    ctx.font='32px sans-serif';
-    ctx.fillText('♡',600,416);
-
-    // Caja blanca con sombra para el QR
-    ctx.save();
-    ctx.shadowColor='rgba(40,35,25,0.08)';
-    ctx.shadowBlur=36;
-    ctx.shadowOffsetY=12;
-    ctx.fillStyle='#FFFFFF';
-    ctx.beginPath();
-    if(ctx.roundRect) ctx.roundRect(240,470,720,720,40);
-    else ctx.rect(240,470,720,720);
-    ctx.fill();
-    ctx.restore();
-
-    dibujarQREnCanvas(ctx,window.location.href,280,510,640,'#252525','#FFFFFF');
-
-    // Instrucciones inferiores
-    ctx.fillStyle='#3B3E32';
-    ctx.font='700 40px "Plus Jakarta Sans", sans-serif';
-    ctx.fillText('¡Escaneá el código QR!',600,1285);
-
-    ctx.fillStyle='#7A7670';
-    ctx.font='400 30px "Plus Jakarta Sans", sans-serif';
-    ctx.fillText('Compartí tus fotos, videos y mensajes del evento',600,1340);
-
-    // Logo Sola al pie si está cargado
-    try{
-      const logoImg=document.querySelector('.sola-footer img');
-      if(logoImg&&logoImg.complete&&logoImg.naturalWidth>0){
-        const h=110;
-        const w=(logoImg.naturalWidth/logoImg.naturalHeight)*h;
-        ctx.globalAlpha=0.82;
-        ctx.drawImage(logoImg,600-w/2,1395,w,h);
-        ctx.globalAlpha=1;
-      }else{
-        ctx.fillStyle='#A4A099';
-        ctx.font='500 22px "Plus Jakarta Sans", sans-serif';
-        ctx.fillText('solainvitaciones.com.ar',600,1475);
-      }
-    }catch(e){}
-
-    descargarCanvasPNG(canvas,'Tarjeta-QR-Mesa-Sola.png');
-  }catch(e){
-    alert('No se pudo generar la tarjeta QR');
   }
 };
 
