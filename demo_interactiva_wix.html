@@ -1922,6 +1922,50 @@ formularioMensajes.addEventListener("submit",(e)=>{
 });
 
 cargarMensajes();
+// MODO RECORRIDO AUTOMÁTICO (?recorrido=1) PARA GRABAR VIDEO DE MUESTRA SIN USAR EL MOUSE
+if(new URLSearchParams(window.location.search).get('recorrido')==='1'){
+  document.documentElement.style.scrollBehavior='auto';
+  function scrollSuaveHasta(destinoY, duracionMs){
+    return new Promise(resolve=>{
+      const inicioY=window.scrollY||0;
+      const diff=destinoY-inicioY;
+      const t0=performance.now();
+      function paso(ahora){
+        const p=Math.min(1,(ahora-t0)/duracionMs);
+        const ease=p<0.5?2*p*p:1-Math.pow(-2*p+2,2)/2;
+        window.scrollTo(0,inicioY+diff*ease);
+        if(p<1)requestAnimationFrame(paso);
+        else resolve();
+      }
+      requestAnimationFrame(paso);
+    });
+  }
+  const esperar=(ms)=>new Promise(r=>setTimeout(r,ms));
+  window.addEventListener('load',async()=>{
+    await esperar(2200);
+    const maxS=Math.max(300,document.documentElement.scrollHeight-window.innerHeight);
+    await scrollSuaveHasta(maxS, 7500);
+    await esperar(1800);
+    await scrollSuaveHasta(0, 1800);
+    await esperar(900);
+    document.getElementById('tabVideos')?.click();
+    await esperar(1200);
+    const v1=document.querySelector('#videosGallery video');
+    if(v1){v1.muted=true;v1.play().catch(()=>{});}
+    await scrollSuaveHasta(260, 2200);
+    await esperar(3200);
+    if(v1)v1.pause();
+    await scrollSuaveHasta(0, 1200);
+    await esperar(700);
+    document.getElementById('tabMensajes')?.click();
+    await esperar(1200);
+    await scrollSuaveHasta(320, 2800);
+    await esperar(2200);
+    await scrollSuaveHasta(0, 1200);
+    await esperar(800);
+    document.getElementById('btnProyeccion')?.click();
+  });
+}
 </script>
 
 <script>
@@ -3211,4 +3255,5 @@ function solaCrearQR(){
 solaCrearQR();
 </script>
 </body></html>
+
 
