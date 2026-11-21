@@ -1,4 +1,3 @@
-
 import { buscarEvento } from './_eventos.js';
 
 const fail = (message, status) =>
@@ -25,11 +24,12 @@ const table = Uint32Array.from({ length: 256 }, (_, i) => {
   return c >>> 0;
 });
 
-function crcUpdate(crc, chunk) {
-  for (const b of chunk) {
-    crc = table[(crc ^ b) & 255] ^ (crc >>> 8);
+function crc32Buf(chunk) {
+  let crc = 0xffffffff;
+  for (let i = 0, len = chunk.length; i < len; i++) {
+    crc = table[(crc ^ chunk[i]) & 255] ^ (crc >>> 8);
   }
-  return crc >>> 0;
+  return (crc ^ 0xffffffff) >>> 0;
 }
 
 function stamp(date) {
@@ -68,7 +68,7 @@ async function listarTodo(bucket, prefix) {
   return archivos;
 }
 
-export async function onRequestPost({ request, env }) {
+async function manejarDescarga({ request, env }) {
   const evento = await buscarEvento(request, env);
   if (!evento) return fail('Álbum no disponible', 404);
 
@@ -76,7 +76,11 @@ export async function onRequestPost({ request, env }) {
     return fail('Almacenamiento no disponible', 503);
   }
 
-  const clave = request.headers.get('X-Pareja-Key') || '';
+  const urlObj = new URL(request.url);
+  const claveRaw = request.headers.get('X-Pareja-Key') || urlObj.searchParams.get('pareja') || '';
+  const matchClave = /[a-f0-9]{48}/i.exec(claveRaw);
+  const clave = matchClave ? matchClave[0] : '';
+
   if (!/^[a-f0-9]{48}$/i.test(clave)) {
     return fail('Clave privada inválida', 403);
   }
@@ -125,10 +129,11 @@ export async function onRequestPost({ request, env }) {
     const isPhoto = photo.test(name);
     const isVideo = video.test(name);
 
-    if (isPhoto || isVideo) {
+    if ((isPhoto || isVideo) && obj.size > 0) {
       files.push({
         key: obj.key,
         name: (isVideo ? 'Videos/' : 'Fotos/') + name,
+        size: obj.size,
         date: obj.uploaded
       });
     }
@@ -192,8 +197,6 @@ export async function onRequestPost({ request, env }) {
       );
     }
 
-    // BOM UTF-8 para mostrar correctamente las tildes
-    // y las eñes en el Bloc de notas de Windows.
     const contenido = enc.encode(
       '\uFEFF' + lineas.join('\r\n')
     );
@@ -201,6 +204,7 @@ export async function onRequestPost({ request, env }) {
     files.push({
       name: 'Mensajes.txt',
       content: contenido,
+      size: contenido.byteLength,
       date: new Date()
     });
   }
@@ -214,125 +218,113 @@ export async function onRequestPost({ request, env }) {
 
   files.sort((a, b) => a.name.localeCompare(b.name));
 
-  // ZIP sin compresión: transmite fotos y videos por partes.
-  const stream = new ReadableStream({
-    async start(controller) {
-      let offset = 0;
-      const central = [];
+  // Calcular tamaño exacto del ZIP (sin Data Descriptors 0x0008 para máxima compatibilidad con Samsung/Android/iOS/Windows)
+  let totalZipBytes = 22; // End of Central Directory
+  for (const f of files) {
+    f.filenameBytes = enc.encode(f.name);
+    totalZipBytes += 30 + f.filenameBytes.byteLength + f.size; // Local Header + data
+    totalZipBytes += 46 + f.filenameBytes.byteLength; // Central Directory Header
+  }
 
-      const send = b => {
-        controller.enqueue(b);
-        offset += b.byteLength;
-      };
+  const { readable, writable } = new TransformStream();
+  const writer = writable.getWriter();
 
-      try {
-        for (const f of files) {
-          const filename = enc.encode(f.name);
-          const { t, d } = stamp(f.date);
-          const start = offset;
+  (async () => {
+    let offset = 0;
+    const central = [];
 
-          const h = [80, 75, 3, 4];
-          u16(h, 20);
-          u16(h, 0x808);
-          u16(h, 0);
-          u16(h, t);
-          u16(h, d);
-          u32(h, 0);
-          u32(h, 0);
-          u32(h, 0);
-          u16(h, filename.length);
-          u16(h, 0);
+    const send = async (b) => {
+      await writer.write(b);
+      offset += b.byteLength;
+    };
 
-          send(bytes(h));
-          send(filename);
+    try {
+      for (const f of files) {
+        const filename = f.filenameBytes;
+        const { t, d } = stamp(f.date);
+        const start = offset;
 
-          let crc = 0xffffffff;
-          let size = 0;
-
-          if (f.content) {
-            crc = crcUpdate(crc, f.content);
-            size = f.content.byteLength;
-            send(f.content);
-          } else {
-            const object = await env.ALBUM_FOTOS.get(f.key);
-
-            if (!object?.body) {
-              throw Error('Falta un archivo durante la descarga');
-            }
-
-            const reader = object.body.getReader();
-
-            try {
-              while (true) {
-                const { done, value } = await reader.read();
-                if (done) break;
-
-                crc = crcUpdate(crc, value);
-                size += value.byteLength;
-                send(value);
-              }
-            } finally {
-              reader.releaseLock();
-            }
-          }
-
-          crc = (crc ^ 0xffffffff) >>> 0;
-
-          const desc = [80, 75, 7, 8];
-          u32(desc, crc);
-          u32(desc, size);
-          u32(desc, size);
-          send(bytes(desc));
-
-          const c = [80, 75, 1, 2];
-          u16(c, 20);
-          u16(c, 20);
-          u16(c, 0x808);
-          u16(c, 0);
-          u16(c, t);
-          u16(c, d);
-          u32(c, crc);
-          u32(c, size);
-          u32(c, size);
-          u16(c, filename.length);
-          u16(c, 0);
-          u16(c, 0);
-          u16(c, 0);
-          u16(c, 0);
-          u32(c, 0);
-          u32(c, start);
-
-          central.push({
-            head: bytes(c),
-            filename
-          });
+        let dataBytes;
+        if (f.content) {
+          dataBytes = f.content;
+        } else {
+          const object = await env.ALBUM_FOTOS.get(f.key);
+          if (!object) throw Error('Falta un archivo durante la descarga');
+          const ab = await object.arrayBuffer();
+          dataBytes = new Uint8Array(ab);
         }
 
-        const centralStart = offset;
+        const crc = crc32Buf(dataBytes);
+        const size = dataBytes.byteLength;
 
-        for (const c of central) {
-          send(c.head);
-          send(c.filename);
-        }
+        // Local file header con CRC y tamaño reales (bandera 0x0800 UTF-8, sin bit 3 Data Descriptor)
+        const h = [80, 75, 3, 4];
+        u16(h, 20);
+        u16(h, 0x0800);
+        u16(h, 0);
+        u16(h, t);
+        u16(h, d);
+        u32(h, crc);
+        u32(h, size);
+        u32(h, size);
+        u16(h, filename.length);
+        u16(h, 0);
 
-        const centralSize = offset - centralStart;
+        await send(bytes(h));
+        await send(filename);
+        await send(dataBytes);
 
-        const end = [80, 75, 5, 6];
-        u16(end, 0);
-        u16(end, 0);
-        u16(end, central.length);
-        u16(end, central.length);
-        u32(end, centralSize);
-        u32(end, centralStart);
-        u16(end, 0);
+        // Liberar referencia inmediatamente para cuidar la memoria del Worker
+        dataBytes = null;
 
-        send(bytes(end));
-        controller.close();
-      } catch (e) {
-        controller.error(e);
+        const c = [80, 75, 1, 2];
+        u16(c, 20);
+        u16(c, 20);
+        u16(c, 0x0800);
+        u16(c, 0);
+        u16(c, t);
+        u16(c, d);
+        u32(c, crc);
+        u32(c, size);
+        u32(c, size);
+        u16(c, filename.length);
+        u16(c, 0);
+        u16(c, 0);
+        u16(c, 0);
+        u16(c, 0);
+        u32(c, 0);
+        u32(c, start);
+
+        central.push({
+          head: bytes(c),
+          filename
+        });
       }
+
+      const centralStart = offset;
+
+      for (const c of central) {
+        await send(c.head);
+        await send(c.filename);
+      }
+
+      const centralSize = offset - centralStart;
+
+      const end = [80, 75, 5, 6];
+      u16(end, 0);
+      u16(end, 0);
+      u16(end, central.length);
+      u16(end, central.length);
+      u32(end, centralSize);
+      u32(end, centralStart);
+      u16(end, 0);
+
+      await send(bytes(end));
+      await writer.close();
+    } catch (e) {
+      await writer.abort(e);
     }
-  });
+  })();
 
   const safe = (album.nombre || 'Evento')
     .normalize('NFD')
@@ -340,13 +332,22 @@ export async function onRequestPost({ request, env }) {
     .replace(/[^a-zA-Z0-9_-]+/g, '-')
     .slice(0, 60) || 'Evento';
 
-  return new Response(stream, {
+  return new Response(readable, {
     headers: {
       'Content-Type': 'application/zip',
+      'Content-Length': String(totalZipBytes),
       'Content-Disposition':
         `attachment; filename="Album-${safe}.zip"`,
       'Cache-Control': 'no-store',
       'X-Content-Type-Options': 'nosniff'
     }
   });
+}
+
+export async function onRequestGet(context) {
+  return manejarDescarga(context);
+}
+
+export async function onRequestPost(context) {
+  return manejarDescarga(context);
 }

@@ -1,7 +1,8 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="es" translate="no">
 <head>
   <meta charset="UTF-8">
+  <meta name="google" content="notranslate">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <title>Panel de Administración · Sola Invitaciones</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -473,7 +474,8 @@
         <h4>🎉 ¡Álbum listo para entregar al cliente!</h4>
         <pre id="textoFichaCliente"></pre>
         <div style="display:flex;gap:8px;flex-wrap:wrap">
-          <button type="button" id="btnCopiarFicha" class="btn-primary">📋 Copiar datos para enviar al cliente</button>
+          <button type="button" id="btnCopiarFicha" class="btn-primary">📋 1. Copiar mensaje e instrucciones</button>
+          <button type="button" id="btnCopiarSoloClave" class="btn-secondary">🔑 2. Copiar SOLO la clave privada</button>
           <button type="button" id="btnDescargarTarjetaNuevo" class="btn-sand">🖨️ Descargar tarjeta QR para mesa (PNG)</button>
           <a id="linkAbrirNuevo" href="#" target="_blank" rel="noopener noreferrer" class="btn-secondary" style="text-decoration:none">↗ Abrir álbum</a>
         </div>
@@ -574,10 +576,7 @@
         `🔗 Enlace del álbum (para compartir con invitados):`,
         `${enlace}`,
         ``,
-        `🔑 Clave privada de anfitriones (solo para ustedes):`,
-        `${clavePareja || "(Generar desde el botón 'Clave de anfitrión')"}`,
-        ``,
-        `💡 Con su clave privada pueden tocar el ícono ⚙ arriba a la derecha del álbum (o el botón "Descargar todo" abajo) para eliminar archivos si lo necesitan y descargar el álbum completo en un archivo .ZIP.`
+        `💡 Para administrar el álbum (eliminar archivos o descargar todas las fotos y videos en un archivo comprimido), tocá el ícono ⚙ arriba a la derecha del álbum e ingresá la clave privada que te envío en el siguiente mensaje:`
       ].join("\n");
     }
 
@@ -616,7 +615,7 @@
 
         ultimoAlbumCreado = datos;
         const fichaTxt = armarTextoEntregaCliente(datos.nombre, datos.fecha, datos.enlace, datos.clavePareja);
-        textoFichaCliente.textContent = fichaTxt;
+        textoFichaCliente.textContent = fichaTxt + "\n\n🔑 Clave privada (para enviar aparte en un segundo mensaje):\n" + (datos.clavePareja || "");
         document.getElementById("linkAbrirNuevo").href = datos.enlace;
         fichaClienteNuevo.classList.add("show");
 
@@ -629,12 +628,23 @@
     }
 
     document.getElementById("btnCopiarFicha").addEventListener("click", async () => {
-      if (!textoFichaCliente.textContent) return;
+      if (!ultimoAlbumCreado) return;
+      const msg1 = armarTextoEntregaCliente(ultimoAlbumCreado.nombre, ultimoAlbumCreado.fecha, ultimoAlbumCreado.enlace, ultimoAlbumCreado.clavePareja);
       try {
-        await navigator.clipboard.writeText(textoFichaCliente.textContent);
-        showToast("¡Ficha completa copiada al portapapeles! 📋");
+        await navigator.clipboard.writeText(msg1);
+        showToast("¡Mensaje 1 (enlace e instrucciones) copiado! Ahora podés copiar la clave sola con el botón 2 📋");
       } catch {
-        prompt("Copiá los datos para el cliente:", textoFichaCliente.textContent);
+        prompt("Copiá el mensaje para el cliente:", msg1);
+      }
+    });
+
+    document.getElementById("btnCopiarSoloClave").addEventListener("click", async () => {
+      if (!ultimoAlbumCreado || !ultimoAlbumCreado.clavePareja) return;
+      try {
+        await navigator.clipboard.writeText(ultimoAlbumCreado.clavePareja);
+        showToast("¡Clave privada sola copiada! Pegala en un mensaje aparte en WhatsApp 🔑");
+      } catch {
+        prompt("Copiá la clave privada sola:", ultimoAlbumCreado.clavePareja);
       }
     });
 
@@ -918,12 +928,17 @@
               album.tieneClavePareja = true;
               badgeClave.className = "status-badge ok";
               badgeClave.textContent = "🔑 Clave anfitrión activa";
-              const ficha = armarTextoEntregaCliente(album.nombre, album.fecha, album.enlace, d.clavePareja);
+              ultimoAlbumCreado = { ...album, clavePareja: d.clavePareja };
+              const fichaTxt = armarTextoEntregaCliente(album.nombre, album.fecha, album.enlace, d.clavePareja);
+              textoFichaCliente.textContent = fichaTxt + "\n\n🔑 Clave privada (para enviar aparte en un segundo mensaje):\n" + d.clavePareja;
+              document.getElementById("linkAbrirNuevo").href = album.enlace;
+              fichaClienteNuevo.classList.add("show");
+              fichaClienteNuevo.scrollIntoView({ behavior: "smooth", block: "center" });
               try {
-                await navigator.clipboard.writeText(ficha);
-                alert("✅ ¡Nueva clave privada creada y ficha completa copiada al portapapeles!\n\nYa podés pegarla en el WhatsApp o correo de tu cliente:\n\n" + ficha);
+                await navigator.clipboard.writeText(d.clavePareja);
+                showToast("¡Clave privada sola copiada al portapapeles! Y arriba tenés los 2 botones para enviar a WhatsApp 🔑", 5000);
               } catch {
-                prompt("Copiá y guardá esta clave privada para tu cliente:", ficha);
+                prompt("Copiá esta clave privada sola para tu cliente:", d.clavePareja);
               }
             } catch (e) {
               alert(e.message);

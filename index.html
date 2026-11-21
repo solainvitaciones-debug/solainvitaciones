@@ -1,7 +1,8 @@
 ﻿<!doctype html>
-<html lang="es">
+<html lang="es" translate="no">
 <head>
 <meta charset="utf-8">
+<meta name="google" content="notranslate">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
 <title>Sola Invitaciones · Álbum compartido</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -1374,7 +1375,26 @@ document.getElementById('btnDescargarModalQR').onclick=()=>{
   }
 };
 
-// ADMINISTRACIÓN DE LA PAREJA
+// ADMINISTRACIÓN DE LA PAREJA / ANFITRIONES
+function extraerClavePareja(texto){
+  if(!texto)return '';
+  const coincidencias=[...String(texto).matchAll(/[a-f0-9]{48}/gi)].map(m=>m[0]);
+  if(!coincidencias.length)return '';
+  const clavePublica=(new URLSearchParams(window.location.search).get('clave')||'').toLowerCase();
+  const privadas=coincidencias.filter(c=>c.toLowerCase()!==clavePublica);
+  return privadas.length?privadas[privadas.length-1]:coincidencias[coincidencias.length-1];
+}
+
+function activarModoAnfitrion(claveLimpia){
+  const btnPareja=document.getElementById('pareja');
+  const lblPareja=document.getElementById('parejaLabel');
+  clavePareja=claveLimpia;
+  if(btnPareja) btnPareja.classList.add('active');
+  if(lblPareja) lblPareja.style.display='inline';
+  showToast('¡Modo anfitrión activado! Ya podés moderar o descargar el álbum.');
+  cargarFotos();cargarVideos();cargarMensajes();
+}
+
 document.getElementById('pareja').onclick=()=>{
   const btnPareja=document.getElementById('pareja');
   const lblPareja=document.getElementById('parejaLabel');
@@ -1386,20 +1406,28 @@ document.getElementById('pareja').onclick=()=>{
     cargarFotos();cargarVideos();cargarMensajes();
     return;
   }
-  const clave=prompt('Ingresá tu clave privada de anfitrión/a:');
-  if(!clave) return;
-  if(!/^[a-f0-9]{48}$/i.test(clave.trim())){
-    alert('La clave privada no tiene el formato correcto');
+  const entrada=prompt('Ingresá tu clave privada de anfitrión/a (también podés pegar el mensaje completo que recibiste):');
+  if(!entrada) return;
+  const claveExtraida=extraerClavePareja(entrada);
+  if(!claveExtraida){
+    alert('No se encontró una clave privada válida en el texto ingresado.');
     return;
   }
-  clavePareja=clave.trim();
-  btnPareja.classList.add('active');
-  if(lblPareja) lblPareja.style.display='inline';
-  showToast('¡Modo anfitrión activado! Ya podés moderar o descargar el álbum.');
-  cargarFotos();cargarVideos();cargarMensajes();
+  activarModoAnfitrion(claveExtraida);
 };
 
-// DESCARGAR TODO
+// Si el anfitrión ingresó con su enlace directo (#anfitrion=...), activar automáticamente
+(function verificarAccesoDirectoAnfitrion(){
+  if(window.location.hash && window.location.hash.includes('anfitrion=')){
+    const limpia=extraerClavePareja(window.location.hash);
+    if(limpia){
+      history.replaceState(null,'',window.location.pathname+window.location.search);
+      setTimeout(()=>activarModoAnfitrion(limpia),400);
+    }
+  }
+})();
+
+// DESCARGAR TODO (DESCARGA NATIVA DIRECTA EN CELULAR Y PC SIN LÍMITE DE 80 MB)
 btnDescargar.onclick=()=>{
   if(!clavePareja){
     if(confirm('La descarga del álbum completo en .ZIP está reservada para los anfitriones (para guardar una foto individual, tocala en la galería y elegí "Descargar foto").\n\n¿Sos anfitrión/a y querés ingresar tu clave privada?')){
@@ -1412,41 +1440,19 @@ btnDescargar.onclick=()=>{
 
 async function ejecutarDescargaZIP(){
   btnDescargar.disabled=true;
-  showToast('Preparando descarga del álbum en ZIP…', 6000);
+  showToast('Iniciando descarga del álbum completo (.ZIP)…', 5000);
   try{
-    const escritorio=typeof window.showSaveFilePicker==='function' && !/Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
-    let handle=null;
-    if(escritorio){
-      handle=await window.showSaveFilePicker({suggestedName:'Album-completo.zip',types:[{description:'Archivo ZIP',accept:{'application/zip':['.zip']}}]});
-    }
-    const r=await fetch('/descargar-album'+parametros,{method:'POST',headers:{'X-Pareja-Key':clavePareja}});
-    if(!r.ok){const d=await r.json().catch(()=>({}));throw Error(d.error||'No se pudo descargar el álbum');}
-    if(!r.body)throw Error('El navegador no permite esta descarga');
-    if(escritorio){
-      const file=await handle.createWritable();
-      try{await r.body.pipeTo(file)}catch(e){await file.abort().catch(()=>{});throw e}
-    }else{
-      const limite=80*1024*1024;
-      const lector=r.body.getReader();const partes=[];let total=0;
-      try{
-        while(true){
-          const {done,value}=await lector.read();if(done)break;
-          total+=value.byteLength;
-          if(total>limite){await lector.cancel();throw Error('Supera los 80 MB. Para descargarlo completo usá una computadora.');}
-          partes.push(value);
-        }
-      }finally{lector.releaseLock()}
-      const blob=new Blob(partes,{type:'application/zip'});
-      const url=URL.createObjectURL(blob);
-      const enlace=document.createElement('a');enlace.href=url;enlace.download='Album-completo.zip';
-      document.body.appendChild(enlace);enlace.click();enlace.remove();
-      setTimeout(()=>URL.revokeObjectURL(url),120000);
-    }
-    showToast('¡Álbum completo descargado correctamente!');
+    const urlDescarga='/descargar-album'+parametros+'&pareja='+encodeURIComponent(clavePareja);
+    const enlace=document.createElement('a');
+    enlace.href=urlDescarga;
+    enlace.download='';
+    document.body.appendChild(enlace);
+    enlace.click();
+    enlace.remove();
   }catch(e){
-    if(e.name!=='AbortError') showToast('Descarga: '+e.message);
+    showToast('Descarga: '+e.message);
   }finally{
-    btnDescargar.disabled=false;
+    setTimeout(()=>{btnDescargar.disabled=false},2500);
   }
 }
 
