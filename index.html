@@ -1588,23 +1588,28 @@ async function verificarContenidoVisualIA(archivo, esVideo){
     return;
   }
 
-  // Para videos: analizar 3 fotogramas (inicio, medio y final)
+  // Para videos: analizar 3 fotogramas (con timeout de seguridad para Safari iOS)
   const url=URL.createObjectURL(archivo);
   const video=document.createElement('video');
   video.muted=true;video.playsInline=true;video.preload='auto';
   try{
-    await new Promise((res,rej)=>{
-      video.onloadeddata=res;
-      video.onerror=rej;
-      video.src=url;
-    });
+    const cargoDatos=await Promise.race([
+      new Promise((res)=>{
+        video.onloadeddata=()=>res(true);
+        video.onerror=()=>res(false);
+        video.src=url;
+        video.load();
+      }),
+      new Promise((res)=>setTimeout(()=>res(false),2200))
+    ]);
+    if(!cargoDatos)return;
     const dur=Number.isFinite(video.duration)&&video.duration>0?video.duration:3;
     for(const fraccion of [0.2, 0.5, 0.8]){
       await new Promise((res)=>{
         const t=Math.min(dur-0.1,Math.max(0.1,dur*fraccion));
         video.onseeked=res;
         video.currentTime=t;
-        setTimeout(res,600);
+        setTimeout(res,500);
       });
       ctx.drawImage(video,0,0,224,224);
       const pred=await modelo.classify(canvas);
@@ -1631,14 +1636,27 @@ function comprobarDuracion(archivo){
   return new Promise((resolve,reject)=>{
     const video=document.createElement('video');
     const url=URL.createObjectURL(archivo);
+    let resuelto=false;
     const limpiar=()=>{video.removeAttribute('src');video.load();URL.revokeObjectURL(url)};
+    const timerFallback=setTimeout(()=>{
+      if(!resuelto){resuelto=true;limpiar();resolve();}
+    },2500);
     video.preload='metadata';
+    video.muted=true;
+    video.playsInline=true;
     video.onloadedmetadata=()=>{
+      if(resuelto)return;
+      resuelto=true;clearTimeout(timerFallback);
       const segundos=video.duration;limpiar();
       Number.isFinite(segundos)&&segundos>0&&segundos<=60.5?resolve():reject(new Error('El video dura más de 1 minuto (60 seg). Podés recortarlo desde tu galería antes de subirlo.'));
     };
-    video.onerror=()=>{limpiar();reject(new Error('No se pudo verificar la duración del video'))};
+    video.onerror=()=>{
+      if(resuelto)return;
+      resuelto=true;clearTimeout(timerFallback);
+      limpiar();resolve(); // El servidor valida la caja moov/mvhd directamente
+    };
     video.src=url;
+    video.load();
   });
 }
 
