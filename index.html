@@ -1271,15 +1271,20 @@ btnProyeccion.onclick=()=>{
   },4000);
 };
 
-// COPIAR ENLACE
-btnCopiarEnlace.onclick=async()=>{
-  try{
-    await navigator.clipboard.writeText(window.location.href);
-    showToast('¡Enlace del álbum copiado! 📋');
-  }catch(e){
-    prompt('Copiá el enlace de tu álbum:', window.location.href);
+// COMPARTIR POR WHATSAPP EN CELULARES / COPIAR ENLACE EN PC
+async function compartirOCopiarEnlace(){
+  const titulo=(document.getElementById('eventoNombre')?.textContent||'Álbum compartido').trim();
+  const urlActual=window.location.href;
+  const esMovil=/Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+  try{await navigator.clipboard.writeText(urlActual)}catch(e){}
+  if(esMovil){
+    const textoWhatsApp=`✨ Sumá tus fotos y videos al álbum de ${titulo}:\n${urlActual}`;
+    window.location.href='https://api.whatsapp.com/send?text='+encodeURIComponent(textoWhatsApp);
+    return;
   }
-};
+  showToast('¡Enlace del álbum copiado! 📋');
+}
+btnCopiarEnlace.onclick=compartirOCopiarEnlace;
 
 // CÓDIGO QR MODAL Y GENERADOR PNG / TARJETA IMPRIMIBLE
 btnModalQR.onclick=()=>{
@@ -1354,21 +1359,7 @@ function renderQRModal(){
   if(btnDescQR) btnDescQR.style.display=clavePareja?'block':'none';
 }
 
-document.getElementById('btnCompartirDesdeQR').onclick=async()=>{
-  const titulo=(document.getElementById('eventoNombre')?.textContent||'Álbum compartido').trim();
-  if(navigator.share){
-    try{
-      await navigator.share({title:titulo+' · Álbum compartido',text:'Sumá tus fotos y videos al álbum de '+titulo+':',url:window.location.href});
-      return;
-    }catch(e){if(e.name==='AbortError')return;}
-  }
-  try{
-    await navigator.clipboard.writeText(window.location.href);
-    showToast('¡Enlace del álbum copiado! 📋');
-  }catch(e){
-    prompt('Copiá el enlace de este álbum:',window.location.href);
-  }
-};
+document.getElementById('btnCompartirDesdeQR').onclick=compartirOCopiarEnlace;
 
 document.getElementById('btnDescargarModalQR').onclick=()=>{
   showToast('Descargando código QR en PNG…');
